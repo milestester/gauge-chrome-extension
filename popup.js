@@ -39,15 +39,16 @@ function update() {
                        + temp["seconds"] + " seconds, "
                        + "on " + timeWasteArray[i];
                 "</li>";
+
       labelArray.push(timeWasteArray[i]);
       dataArray.push(obj[now.toLocaleDateString()]);
     }
   }
   output += "</ul>";
-  document.getElementById('status').innerHTML = output;
+  // document.getElementById('status').innerHTML = output;
 
 
-
+  var timeFormat = 'MM/DD/YYYY HH:mm';
   var ctx = document.getElementById("myChart");
   var data = {
     labels: labelArray,
@@ -65,11 +66,51 @@ function update() {
                 "#FFCE56"
             ]
         }]
-
   };
+  var options = {
+    responsive: true,
+    title: {
+      display: true,
+      text: "Time Wasted Today",
+      fontSize: 18,
+      fontFamily: "Helvetica Neue",
+      fontStyle: "normal"
+    },
+    legend: {
+      position: 'bottom',
+      fullWidth: true,
+      labels: {
+        fontSize: 14,
+        fontFamily: "Helvetica Neue",
+        fontStyle: "normal"
+      }
+    },
+    tooltips: {
+      enabled: true,
+      mode: 'single',
+      callbacks: {
+        label: function(tooltipItems, data) {
+            var fullTime = msToTime(data.datasets[0].data[tooltipItems.index]);
+            var output = "";
+            if(fullTime["hours"] > 0) {
+              output += fullTime["hours"] + " hours, ";
+            }
+            if(fullTime["minutes"] > 0) {
+              output += fullTime["minutes"] + " minutes, "
+            }
+            if(fullTime["seconds"] > 0) {
+              output += fullTime["seconds"] + " seconds"
+            }
+            return output;
+          }
+      }
+    }
+  };
+
   var myChart = new Chart(ctx, {
       type: 'doughnut',
-      data: data
+      data: data,
+      options: options
   });
 }
 
