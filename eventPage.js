@@ -28,7 +28,7 @@ inactivity after certain number of seconds, or if you click away from chrome
 
 var timeWasteArray = ["www.facebook.com", "twitter.com", "www.youtube.com"];
 
-var getActiveTab = function() {
+function getActiveTab() {
   var queryInfo = {active: true, currentWindow: true};
   chrome.tabs.query(queryInfo, function(tabs) {
     if(tabs.length > 0) {

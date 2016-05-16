@@ -26,50 +26,81 @@ document.addEventListener('DOMContentLoaded', function() {
 function update() {
   var dataArray = [];
   var labelArray = [];
-
   var now = new Date();
   var output = "<h1> Today you've wasted: </h1> <ul>";
   for(var i = 0; i < timeWasteArray.length; i++) {
     if(!localStorage[timeWasteArray[i]]) continue;
     var obj = JSON.parse(localStorage[timeWasteArray[i]]);
     if(obj[now.toLocaleDateString()]) {
-      var temp = msToTime(obj[now.toLocaleDateString()]);
-      output += "<li>" + temp["hours"] + " hours, "
-                       + temp["minutes"] + " minutes, "
-                       + temp["seconds"] + " seconds, "
-                       + "on " + timeWasteArray[i];
-                "</li>";
       labelArray.push(timeWasteArray[i]);
       dataArray.push(obj[now.toLocaleDateString()]);
     }
   }
-  output += "</ul>";
-  document.getElementById('status').innerHTML = output;
+  buildGraph(dataArray, labelArray);
+}
 
-
-
+function buildGraph(dataArray, labelArray) {
   var ctx = document.getElementById("myChart");
   var data = {
     labels: labelArray,
     datasets: [
-        {
-            data: dataArray,
-            backgroundColor: [
-                "#FF6384",
-                "#36A2EB",
-                "#FFCE56"
-            ],
-            hoverBackgroundColor: [
-                "#FF6384",
-                "#36A2EB",
-                "#FFCE56"
-            ]
-        }]
-
+      {
+        data: dataArray,
+        backgroundColor: [
+          "#FF6384",
+          "#36A2EB",
+          "#FFCE56"
+        ],
+        hoverBackgroundColor: [
+          "#FF6384",
+          "#36A2EB",
+          "#FFCE56"
+        ]
+      }]
+  };
+  var options = {
+    responsive: true,
+    title: {
+      display: true,
+      text: "Time Wasted Today",
+      fontSize: 18,
+      fontFamily: "Helvetica Neue",
+      fontStyle: "normal"
+    },
+    legend: {
+      position: 'bottom',
+      fullWidth: true,
+      labels: {
+        fontSize: 14,
+        fontFamily: "Helvetica Neue",
+        fontStyle: "normal"
+      }
+    },
+    tooltips: {
+      enabled: true,
+      mode: 'single',
+      callbacks: {
+        label: function(tooltipItems, data) {
+            var fullTime = msToTime(data.datasets[0].data[tooltipItems.index]);
+            var output = "";
+            if(fullTime["hours"] > 0) {
+              output += fullTime["hours"] + " hours, ";
+            }
+            if(fullTime["minutes"] > 0) {
+              output += fullTime["minutes"] + " minutes, "
+            }
+            if(fullTime["seconds"] > 0) {
+              output += fullTime["seconds"] + " seconds"
+            }
+            return output;
+          }
+      }
+    }
   };
   var myChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: data
+    type: 'doughnut',
+    data: data,
+    options: options
   });
 }
 
