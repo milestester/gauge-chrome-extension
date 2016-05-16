@@ -26,46 +26,37 @@ document.addEventListener('DOMContentLoaded', function() {
 function update() {
   var dataArray = [];
   var labelArray = [];
-
   var now = new Date();
   var output = "<h1> Today you've wasted: </h1> <ul>";
   for(var i = 0; i < timeWasteArray.length; i++) {
     if(!localStorage[timeWasteArray[i]]) continue;
     var obj = JSON.parse(localStorage[timeWasteArray[i]]);
     if(obj[now.toLocaleDateString()]) {
-      var temp = msToTime(obj[now.toLocaleDateString()]);
-      output += "<li>" + temp["hours"] + " hours, "
-                       + temp["minutes"] + " minutes, "
-                       + temp["seconds"] + " seconds, "
-                       + "on " + timeWasteArray[i];
-                "</li>";
-
       labelArray.push(timeWasteArray[i]);
       dataArray.push(obj[now.toLocaleDateString()]);
     }
   }
-  output += "</ul>";
-  // document.getElementById('status').innerHTML = output;
+  buildGraph(dataArray, labelArray);
+}
 
-
-  var timeFormat = 'MM/DD/YYYY HH:mm';
+function buildGraph(dataArray, labelArray) {
   var ctx = document.getElementById("myChart");
   var data = {
     labels: labelArray,
     datasets: [
-        {
-            data: dataArray,
-            backgroundColor: [
-                "#FF6384",
-                "#36A2EB",
-                "#FFCE56"
-            ],
-            hoverBackgroundColor: [
-                "#FF6384",
-                "#36A2EB",
-                "#FFCE56"
-            ]
-        }]
+      {
+        data: dataArray,
+        backgroundColor: [
+          "#FF6384",
+          "#36A2EB",
+          "#FFCE56"
+        ],
+        hoverBackgroundColor: [
+          "#FF6384",
+          "#36A2EB",
+          "#FFCE56"
+        ]
+      }]
   };
   var options = {
     responsive: true,
@@ -106,11 +97,10 @@ function update() {
       }
     }
   };
-
   var myChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: data,
-      options: options
+    type: 'doughnut',
+    data: data,
+    options: options
   });
 }
 
