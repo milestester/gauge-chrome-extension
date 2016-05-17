@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener("DOMContentLoaded", function() {
   var queryInfo = {active: true, currentWindow: true};
   chrome.tabs.query(queryInfo, function(tabs) {
     if(tabs.length > 0) {
@@ -35,7 +35,13 @@ function updatePopup() {
       dataArray.push(obj[now.toLocaleDateString()]);
     }
   }
-  buildGraph(dataArray, labelArray);
+  if(dataArray.length == 0) {
+    document.getElementById("myChart").style.display = "none";
+    document.getElementsByTagName("h1")[0].style.display = "block";
+  } else {
+    document.getElementsByTagName("h1")[0].style.display = "none";
+    buildGraph(dataArray, labelArray);
+  }
 }
 
 function buildGraph(dataArray, labelArray) {
@@ -45,6 +51,7 @@ function buildGraph(dataArray, labelArray) {
     datasets: [
       {
         data: dataArray,
+        borderWidth: 3,
         backgroundColor: [
           "#FF6384",
           "#36A2EB",
@@ -61,13 +68,13 @@ function buildGraph(dataArray, labelArray) {
     responsive: true,
     title: {
       display: true,
-      text: "Time Wasted Today",
+      text: "Time Spent Today",
       fontSize: 18,
       fontFamily: "Helvetica Neue",
       fontStyle: "normal"
     },
     legend: {
-      position: 'bottom',
+      position: "bottom",
       fullWidth: true,
       labels: {
         fontSize: 14,
@@ -77,7 +84,7 @@ function buildGraph(dataArray, labelArray) {
     },
     tooltips: {
       enabled: true,
-      mode: 'single',
+      mode: "single",
       callbacks: {
         label: function(tooltipItems, data) {
             var fullTime = msToTime(data.datasets[0].data[tooltipItems.index]);
@@ -85,10 +92,10 @@ function buildGraph(dataArray, labelArray) {
             if(fullTime["hours"] > 0) {
               output += fullTime["hours"] + " hours, ";
             }
-            if(fullTime["minutes"] > 0) {
+            if(fullTime["minutes"] >= 0) {
               output += fullTime["minutes"] + " minutes, "
             }
-            if(fullTime["seconds"] > 0) {
+            if(fullTime["seconds"] >= 0) {
               output += fullTime["seconds"] + " seconds"
             }
             return output;
@@ -97,7 +104,7 @@ function buildGraph(dataArray, labelArray) {
     }
   };
   var myChart = new Chart(ctx, {
-    type: 'doughnut',
+    type: "doughnut",
     data: data,
     options: options
   });

@@ -18,15 +18,30 @@ Local storage will look like:
 }
 
 Check for inactivity [context scripts]
-Check for multiple tabs
-Clicking between wasted tabs
+Check for multiple tabs - done
+Clicking between wasted tabs - done
 
 TODO: sanitize in 7 days
 inactivity after certain number of seconds, or if you click away from chrome
+refresh even if dont click button again?
 
 */
 
 var timeWasteArray = ["www.facebook.com", "twitter.com", "www.youtube.com"];
+
+function sanitize() {
+  for(var i = 0; i < timeWasteArray.length; i++) {
+    if(!localStorage[timeWasteArray[i]]) continue;
+    var obj = JSON.parse(localStorage[timeWasteArray[i]]);
+    var now = new Date();
+    var currentDate = now.toLocaleDateString();
+    var sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate()-8);
+    if(localStorage[sevenDaysAgo.toLocaleDateString()]) {
+      localStorage.removeItem(sevenDaysAgo);
+    }
+  }
+}
 
 function getActiveTab() {
   var queryInfo = {active: true, currentWindow: true};
@@ -34,11 +49,12 @@ function getActiveTab() {
     if(tabs.length > 0) {
       var url = new URL(tabs[0].url);
       var hostName = url.hostname;
-      if(timeWasteArray.indexOf(hostName) != -1) {
-        // Current Tab IN blacklist
-        if(localStorage["currentPage"] != hostName) {
-          var now = new Date();
-          var currentActiveTime = now.getTime();
+      var previousPage = localStorage["currentPage"];
+      var now = new Date();
+      var currentActiveTime = now.getTime();
+      if(previousPage != hostName) {
+        if(timeWasteArray.indexOf(hostName) != -1) {
+          // Current Tab IN blacklist, set time navigated to now
           var obj = localStorage[hostName];
           if(obj) {
             obj = JSON.parse(obj);
@@ -49,17 +65,14 @@ function getActiveTab() {
           }
           localStorage[hostName] = JSON.stringify(obj);
         }
-      }
-      // Current Tab NOT in blacklist
-      var previousPage = localStorage["currentPage"];
-      if(timeWasteArray.indexOf(previousPage) != -1 && previousPage != hostName) {
-        var obj = localStorage[previousPage];
-        if(obj) {
-          var now = new Date();
-          var currentActiveTime = now.getTime();
-          obj = JSON.parse(obj);
-          obj[now.toLocaleDateString()] += (currentActiveTime - obj["lastNavigatedTime"]);
-          localStorage[previousPage] = JSON.stringify(obj);
+        // Current Tab NOT in blacklist, if not in same host, update time spent on page
+        if(timeWasteArray.indexOf(previousPage) != -1) {
+          var obj = localStorage[previousPage];
+          if(obj) {
+            obj = JSON.parse(obj);
+            obj[now.toLocaleDateString()] += (currentActiveTime - obj["lastNavigatedTime"]);
+            localStorage[previousPage] = JSON.stringify(obj);
+          }
         }
       }
       localStorage["currentPage"] = hostName;
@@ -73,3 +86,5 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     getActiveTab();
   }
 });
+chrome.runtime.onStartup.addListener(sanitize);
+chrome.runtime.onInstalled.addListener(sanitize);
