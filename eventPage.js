@@ -52,7 +52,7 @@ function getActiveTab() {
       }
       // Current Tab NOT in blacklist
       var previousPage = localStorage["currentPage"];
-      if(timeWasteArray.indexOf(previousPage) != -1) {
+      if(timeWasteArray.indexOf(previousPage) != -1 && previousPage != hostName) {
         var obj = localStorage[previousPage];
         if(obj) {
           var now = new Date();

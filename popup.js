@@ -18,16 +18,15 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         }
       }
-      update();
+      updatePopup();
     }
   });
 });
 
-function update() {
+function updatePopup() {
   var dataArray = [];
   var labelArray = [];
   var now = new Date();
-  var output = "<h1> Today you've wasted: </h1> <ul>";
   for(var i = 0; i < timeWasteArray.length; i++) {
     if(!localStorage[timeWasteArray[i]]) continue;
     var obj = JSON.parse(localStorage[timeWasteArray[i]]);
