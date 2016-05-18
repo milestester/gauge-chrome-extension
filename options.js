@@ -32,10 +32,19 @@ function loadCurrentWebsites() {
   document.getElementsByTagName("input")[0].focus();
 
   for(var i = 0; i < timeWasteArray.length; i++) {
+
     var node = document.createElement("p");
     node.className = "storedsite";
+    var textSpan = document.createElement("span");
     var textnode = document.createTextNode(timeWasteArray[i]);
-    node.appendChild(textnode);
+    textSpan.appendChild(textnode);
+    node.appendChild(textSpan);
+
+    var deleteSpan = document.createElement("span");
+    var deleteText = document.createTextNode("Delete");
+    deleteSpan.appendChild(deleteText);
+    node.appendChild(deleteSpan);
+
     document.getElementById("current-websites").appendChild(node);
   }
 
@@ -46,10 +55,19 @@ function loadCurrentWebsites() {
       var newURL = document.getElementsByTagName("input")[0].value;
       if(timeWasteArray.indexOf(newURL) == -1) {
         timeWasteArray.push(newURL);
+
         var node = document.createElement("p");
         node.className = "storedsite";
+        var textSpan = document.createElement("span");
         var textnode = document.createTextNode(newURL);
-        node.appendChild(textnode);
+        textSpan.appendChild(textnode);
+        node.appendChild(textSpan);
+
+        var deleteSpan = document.createElement("span");
+        var deleteText = document.createTextNode("Delete");
+        deleteSpan.appendChild(deleteText);
+        node.appendChild(deleteSpan);
+
         document.getElementById("current-websites").appendChild(node);
         document.getElementsByTagName("input")[0].value = "";
         localStorage["timeWasteArray"] = JSON.stringify(timeWasteArray);
@@ -58,12 +76,19 @@ function loadCurrentWebsites() {
   }
 
   var itemsToDelete = document.getElementsByClassName("storedsite");
-  for(var i = 0; i < itemsToDelete.length; i++) {
-    var item = itemsToDelete[i].innerText;
-    itemsToDelete[i].onmousedown = function(event) {
-      console.log(item);
-    }
+  for(var i = 0; i < itemsToDelete.length-1; i++) {
+    itemsToDelete[i].onmousedown = deleteItem(i);
   }
 }
 
+function deleteItem(index) {
+  var itemsToDelete = document.getElementsByClassName("storedsite");
+  var item = itemsToDelete[index];
+  return function(event) {
+    timeWasteArray.splice(index, 1);
+    localStorage["timeWasteArray"] = JSON.stringify(timeWasteArray);
+    localStorage.removeItem(itemsToDelete[index].firstChild.innerText);
+    document.getElementById("current-websites").removeChild(itemsToDelete[index]);
+  };
+}
 document.addEventListener('DOMContentLoaded', loadCurrentWebsites);
