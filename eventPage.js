@@ -27,7 +27,11 @@ refresh even if dont click button again?
 
 */
 
-var timeWasteArray = ["www.facebook.com", "twitter.com", "www.youtube.com"];
+// var timeWasteArray = ["www.facebook.com", "twitter.com", "www.youtube.com"];
+if(!localStorage["timeWasteArray"]) {
+  localStorage["timeWasteArray"] =  JSON.stringify([]);
+}
+var timeWasteArray = JSON.parse(localStorage["timeWasteArray"]);
 
 function sanitize() {
   for(var i = 0; i < timeWasteArray.length; i++) {

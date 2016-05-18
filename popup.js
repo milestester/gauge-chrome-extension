@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", function() {
 function updatePopup() {
   var dataArray = [];
   var labelArray = [];
+  var dataColorArray = [];
   var now = new Date();
   for(var i = 0; i < timeWasteArray.length; i++) {
     if(!localStorage[timeWasteArray[i]]) continue;
@@ -33,6 +34,7 @@ function updatePopup() {
     if(obj[now.toLocaleDateString()]) {
       labelArray.push(timeWasteArray[i]);
       dataArray.push(obj[now.toLocaleDateString()]);
+      dataColorArray.push(randomColor(1));
     }
   }
   if(dataArray.length == 0) {
@@ -40,11 +42,11 @@ function updatePopup() {
     document.getElementsByTagName("h1")[0].style.display = "block";
   } else {
     document.getElementsByTagName("h1")[0].style.display = "none";
-    buildGraph(dataArray, labelArray);
+    buildGraph(dataArray, labelArray, dataColorArray);
   }
 }
 
-function buildGraph(dataArray, labelArray) {
+function buildGraph(dataArray, labelArray, dataColorArray) {
   var ctx = document.getElementById("myChart");
   var data = {
     labels: labelArray,
@@ -52,16 +54,18 @@ function buildGraph(dataArray, labelArray) {
       {
         data: dataArray,
         borderWidth: 3,
-        backgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56"
-        ],
-        hoverBackgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56"
-        ]
+        // backgroundColor: [
+        //   "#FF6384",
+        //   "#36A2EB",
+        //   "#FFCE56"
+        // ],
+        backgroundColor: dataColorArray,
+        // hoverBackgroundColor: [
+        //   "#FF6384",
+        //   "#36A2EB",
+        //   "#FFCE56"
+        // ]
+        hoverBackgroundColor: dataColorArray
       }]
   };
   var options = {
@@ -117,3 +121,10 @@ function msToTime(duration) {
     var hours = parseInt((duration/(1000*60*60))%24);
     return {hours: hours, minutes: minutes, seconds: seconds, milliseconds: milliseconds};
 }
+
+var randomColorFactor = function() {
+  return Math.round(Math.random() * 255);
+};
+var randomColor = function(opacity) {
+  return 'rgba(' + randomColorFactor() + ',' + randomColorFactor() + ',' + randomColorFactor() + ',' + (opacity || '.3') + ')';
+};
