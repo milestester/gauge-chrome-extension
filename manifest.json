@@ -11,9 +11,9 @@
   },
 
   "permissions": [
+    "storage",
     "activeTab",
-    "tabs",
-    "storage"
+    "tabs"
   ],
 
   "background" : {
@@ -21,9 +21,9 @@
     "persistent": false
   },
 
- "options_ui": {
-  "page": "options.html",
-  "chrome_style": true
+  "options_ui": {
+    "page": "options.html",
+    "chrome_style": true
   },
 
   "icons" : {

@@ -1,4 +1,13 @@
 document.addEventListener("DOMContentLoaded", function() {
+
+  document.getElementsByTagName("img")[0].addEventListener("click", function(event) {
+    if(chrome.runtime.openOptionsPage) {
+      chrome.runtime.openOptionsPage();
+    } else {
+      window.open(chrome.runtime.getURL('options.html'));
+    }
+  });
+
   var queryInfo = {active: true, currentWindow: true};
   chrome.tabs.query(queryInfo, function(tabs) {
     if(tabs.length > 0) {
