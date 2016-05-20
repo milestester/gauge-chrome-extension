@@ -32,137 +32,6 @@ refresh even if dont click button again?
 
 */
 
-// var timeWasteArray = ["www.facebook.com", "twitter.com", "www.youtube.com"];
-getFromLocalStorage("timeWasteArray", initilizeTimeWasteArray);
-
-function initilizeTimeWasteArray(items) {
- if(Object.keys(items).length === 0 && items.constructor === Object) {
-    chrome.storage.sync.set({"timeWasteArray": []}, function() {
-      console.log('Initialized Time Waste Array');
-    });
-  }
-}
-
-// chrome.storage.sync.get("timeWasteArray", function(items) {
-//   if(Object.keys(items).length === 0 && items.constructor === Object) {
-//     chrome.storage.sync.set({"timeWasteArray": []}, function() {
-//       console.log('Initialized Time Waste Array');
-//     });
-//   }
-// });
-
-// if(!localStorage["timeWasteArray"]) {
-//   localStorage["timeWasteArray"] =  JSON.stringify([]);
-// }
-// var timeWasteArray = JSON.parse(localStorage["timeWasteArray"]);
-
-function sanitize() {
-  for(var i = 0; i < timeWasteArray.length; i++) {
-    if(!localStorage[timeWasteArray[i]]) continue;
-    var obj = JSON.parse(localStorage[timeWasteArray[i]]);
-    var now = new Date();
-    var currentDate = now.toLocaleDateString();
-    var sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate()-8);
-    if(localStorage[sevenDaysAgo.toLocaleDateString()]) {
-      localStorage.removeItem(sevenDaysAgo);
-    }
-  }
-}
-
-function getActiveTab() {
-  var queryInfo = {active: true, currentWindow: true};
-  chrome.tabs.query(queryInfo, function(tabs) {
-    if(tabs.length > 0) {
-      var url = new URL(tabs[0].url);
-      var hostName = url.hostname;
-      getFromLocalStorage("currentPage", function(page) {
-        var now = new Date();
-        var currentActiveTime = now.getTime();
-        var previousPage = page.currentPage;
-        if(previousPage != hostName) {
-          getFromLocalStorage("timeWasteArray", function(timeWasteArray) {
-            var timeWasteArray = timeWasteArray.timeWasteArray;
-            getFromLocalStorage(hostName, function(obj) {
-              if(timeWasteArray.indexOf(hostName) != -1) {
-                if(!objectEmpty(obj)) {
-                  obj = obj[hostName];
-                  obj["lastNavigatedTime"] = currentActiveTime;
-                } else {
-                  obj = {lastNavigatedTime: currentActiveTime};
-                  obj[now.toLocaleDateString()] = 0;
-                }
-                var temp = {};
-                temp[hostName] = obj;
-                saveToLocalStorage(temp);
-              }
-            });
-            // Current Tab NOT in blacklist, if not in same host, update time spent on page
-            if(timeWasteArray.indexOf(previousPage) != -1) {
-              getFromLocalStorage(previousPage, function(obj) {
-                obj = obj[previousPage];
-                if(obj) {
-                  obj[now.toLocaleDateString()] += (currentActiveTime - obj["lastNavigatedTime"]);
-                  var temp = {};
-                  temp[previousPage] = obj;
-                  saveToLocalStorage(temp);
-                }
-              });
-            }
-          });
-        }
-        saveToLocalStorage({"currentPage": hostName});
-      });
-    }
-  });
-}
-
-// function getActiveTab() {
-//   var queryInfo = {active: true, currentWindow: true};
-//   chrome.tabs.query(queryInfo, function(tabs) {
-//     if(tabs.length > 0) {
-//       var url = new URL(tabs[0].url);
-//       var hostName = url.hostname;
-//       var previousPage = localStorage["currentPage"];
-//       var now = new Date();
-//       var currentActiveTime = now.getTime();
-//       if(previousPage != hostName) {
-//         if(timeWasteArray.indexOf(hostName) != -1) {
-//           // Current Tab IN blacklist, set time navigated to now
-//           var obj = localStorage[hostName];
-//           if(obj) {
-//             obj = JSON.parse(obj);
-//             obj["lastNavigatedTime"] = currentActiveTime;
-//           } else {
-//             obj = {lastNavigatedTime: currentActiveTime};
-//             obj[now.toLocaleDateString()] = 0;
-//           }
-//           localStorage[hostName] = JSON.stringify(obj);
-//         }
-//         // Current Tab NOT in blacklist, if not in same host, update time spent on page
-//         if(timeWasteArray.indexOf(previousPage) != -1) {
-//           var obj = localStorage[previousPage];
-//           if(obj) {
-//             obj = JSON.parse(obj);
-//             obj[now.toLocaleDateString()] += (currentActiveTime - obj["lastNavigatedTime"]);
-//             localStorage[previousPage] = JSON.stringify(obj);
-//           }
-//         }
-//       }
-//       localStorage["currentPage"] = hostName;
-//     }
-//   });
-// }
-
-chrome.tabs.onActivated.addListener(getActiveTab);
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-  if(changeInfo.status == "complete") {
-    getActiveTab();
-  }
-});
-// chrome.runtime.onStartup.addListener(sanitize);
-// chrome.runtime.onInstalled.addListener(sanitize);
-
 function objectEmpty(obj) {
  return (Object.keys(obj).length === 0 && obj.constructor === Object);
 }
@@ -172,9 +41,134 @@ function saveToLocalStorage(items, callback) {
 }
 
 function getFromLocalStorage(key, callback) {
-  chrome.storage.sync.get(key, callback);
+  chrome.storage.sync.get(key, function(obj) {
+    if(objectEmpty(obj)) {
+      callback(null);
+    } else {
+      callback(obj[key]);
+    }
+  });
 }
 
 function removeFromLocalStorage(key, callback) {
   chrome.storage.sync.remove(key, callback);
 }
+
+function initilizeTimeWasteArray(items) {
+  if(items == null || objectEmpty(items)) {
+    saveToLocalStorage({"timeWasteArray": []}, function() {
+      console.log("Initialized Time Waste Array");
+    });
+  }
+}
+
+function sanitize() {
+  getFromLocalStorage("timeWasteArray", function(timeWasteArray) {
+    if(timeWasteArray) {
+      console.log(timeWasteArray);
+      for(var i = 0; i < timeWasteArray.length; i++) {
+        getFromLocalStorage(timeWasteArray[i], function(siteData) {
+          if(siteData) {
+            console.log(siteData);
+            var now = new Date();
+            var currentDate = now.toLocaleDateString();
+            now.setDate(now.getDate()-8);
+            var eightDaysAgo = now.toLocaleDateString();
+            if(siteData[eightDaysAgo]) {
+              delete siteData[eightDaysAgo];
+              var res = {};
+              res[timeWasteArray[i]] = siteData;
+              saveToLocalStorage(res, function() {
+                console.log("Eight day removed");
+              });
+            }
+          }
+        });
+      }
+    }
+  });
+}
+
+function getDomainFromHostName(hostName) {
+  var splitHostName = hostName.split("www.")
+  if(splitHostName.length == 1) {
+    return splitHostName[0];
+  } else if(splitHostName.length == 2) {
+    return splitHostName[1];
+  }
+}
+
+function getActiveTab() {
+  var queryInfo = {active: true, currentWindow: true};
+  chrome.tabs.query(queryInfo, function(tabs) {
+    if(tabs.length > 0) {
+      var url = new URL(tabs[0].url);
+      var hostName = url.hostname;
+      var domain = getDomainFromHostName(hostName);
+      console.log("Current Domain: " + domain);
+      getFromLocalStorage("currentPage", function(previousPage) {
+        if(previousPage) {
+          console.log("Prev Page: " + previousPage);
+          var now = new Date();
+          var currentActiveTime = now.getTime();
+          if(previousPage != domain) {
+            getFromLocalStorage("timeWasteArray", function(timeWasteArray) {
+              if(timeWasteArray) {
+                console.log(timeWasteArray);
+                // If current domain is in time waste array
+                // Set last navigated time to now
+                if(timeWasteArray.indexOf(domain) != -1) {
+                  getFromLocalStorage(domain, function(siteData) {
+                    console.log(siteData);
+                    if(siteData) {
+                      siteData["lastNavigatedTime"] = currentActiveTime;
+                    } else {
+                      siteData = {};
+                      siteData["lastNavigatedTime"] = currentActiveTime;
+                      siteData[now.toLocaleDateString()] = 0;
+                    }
+                    var toSave = {};
+                    toSave[domain] = siteData;
+                    saveToLocalStorage(toSave, function() {
+                      console.log("Updated lastNavigatedTime for " + domain);
+                    });
+                  });
+                }
+                // Current Tab NOT in blacklist, if not in same host, update time spent on page
+                if(timeWasteArray.indexOf(previousPage) != -1) {
+                  console.log("Ready to update " + previousPage);
+                  getFromLocalStorage(previousPage, function(siteData) {
+                    if(siteData) {
+                      console.log("Site data for " + previousPage);
+                      console.log(siteData);
+                      if(!siteData[now.toLocaleDateString()]) siteData[now.toLocaleDateString()] = 0;
+                      siteData[now.toLocaleDateString()] += (currentActiveTime - siteData["lastNavigatedTime"]);
+                      toSave = {};
+                      toSave[previousPage] = siteData;
+                      saveToLocalStorage(toSave, function() {
+                        console.log("Updated time spent on page for domain " + domain);
+                      });
+                    }
+                  });
+                }
+              }
+            });
+          }
+        }
+        saveToLocalStorage({"currentPage": domain}, function() {
+          console.log("updated current page");
+        });
+      });
+    }
+  });
+}
+
+getFromLocalStorage("timeWasteArray", initilizeTimeWasteArray);
+chrome.runtime.onStartup.addListener(sanitize);
+chrome.runtime.onInstalled.addListener(sanitize);
+chrome.tabs.onActivated.addListener(getActiveTab);
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+  if(changeInfo.status == "complete") {
+    getActiveTab();
+  }
+});
