@@ -1,94 +1,50 @@
-// Saves options to chrome.storage.sync.
-// function save_options() {
-//   var color = document.getElementById('color').value;
-//   var likesColor = document.getElementById('like').checked;
-//   chrome.storage.sync.set({
-//     favoriteColor: color,
-//     likesColor: likesColor
-//   }, function() {
-//     // Update status to let user know options were saved.
-//     var status = document.getElementById('status');
-//     status.textContent = 'Options saved.';
-//     setTimeout(function() {
-//       status.textContent = '';
-//     }, 750);
-//   });
-// }
+function createNodeWithText(nodeType, text) {
+  var newNode = document.createElement(nodeType);
+  var textNode = document.createTextNode(text);
+  newNode.appendChild(textNode);
+  return newNode;
+}
 
-// // Restores select box and checkbox state using the preferences
-// // stored in chrome.storage.
-// function restore_options() {
-//   // Use default value color = 'red' and likesColor = true.
-//   chrome.storage.sync.get({
-//     favoriteColor: 'red',
-//     likesColor: true
-//   }, function(items) {
-//     document.getElementById('color').value = items.favoriteColor;
-//     document.getElementById('like').checked = items.likesColor;
-//   });
-// }
+function buildOptionLabel(labelText) {
+  var node = document.createElement("p");
+  node.className = "storedsite";
+  node.appendChild(createNodeWithText("span", labelText));
+  node.appendChild(createNodeWithText("span", "delete"));
+  document.getElementById("current-websites").appendChild(node);
+  node.onmousedown = deleteItem(node);
+}
 
 function loadCurrentWebsites() {
-  document.getElementsByTagName("input")[0].focus();
-
+  document.getElementById("websiteInput").focus();
   for(var i = 0; i < timeWasteArray.length; i++) {
-
-    var node = document.createElement("p");
-    node.className = "storedsite";
-    var textSpan = document.createElement("span");
-    var textnode = document.createTextNode(timeWasteArray[i]);
-    textSpan.appendChild(textnode);
-    node.appendChild(textSpan);
-
-    var deleteSpan = document.createElement("span");
-    var deleteText = document.createTextNode("Delete");
-    deleteSpan.appendChild(deleteText);
-    node.appendChild(deleteSpan);
-
-    document.getElementById("current-websites").appendChild(node);
+    buildOptionLabel(timeWasteArray[i]);
   }
+  setEventListeners();
+}
 
-  document.getElementsByTagName("input")[0].onkeypress = function(e){
+function setEventListeners() {
+  document.getElementById("websiteInput").onkeypress = function(e){
     if (!e) e = window.event;
     var keyCode = e.keyCode || e.which;
     if (keyCode == '13'){
-      var newURL = document.getElementsByTagName("input")[0].value;
+      var newURL = this.value;
       if(timeWasteArray.indexOf(newURL) == -1) {
         timeWasteArray.push(newURL);
-
-        var node = document.createElement("p");
-        node.className = "storedsite";
-        var textSpan = document.createElement("span");
-        var textnode = document.createTextNode(newURL);
-        textSpan.appendChild(textnode);
-        node.appendChild(textSpan);
-
-        var deleteSpan = document.createElement("span");
-        var deleteText = document.createTextNode("Delete");
-        deleteSpan.appendChild(deleteText);
-        node.appendChild(deleteSpan);
-
-        document.getElementById("current-websites").appendChild(node);
-        document.getElementsByTagName("input")[0].value = "";
+        buildOptionLabel(newURL);
+        this.value = "";
         localStorage["timeWasteArray"] = JSON.stringify(timeWasteArray);
       }
     }
   }
-
-  var itemsToDelete = document.getElementsByClassName("storedsite");
-  for(var i = 0; i < itemsToDelete.length-1; i++) {
-    itemsToDelete[i].onmousedown = deleteItem(i);
-  }
 }
 
-function deleteItem(index) {
-  var itemsToDelete = document.getElementsByClassName("storedsite");
-  var item = itemsToDelete[index];
+function deleteItem(node) {
   return function(event) {
+    var index = timeWasteArray.indexOf(node.innerText);
     timeWasteArray.splice(index, 1);
     localStorage["timeWasteArray"] = JSON.stringify(timeWasteArray);
-    localStorage.removeItem(itemsToDelete[index].firstChild.innerText);
-    document.getElementById("current-websites").removeChild(itemsToDelete[index]);
+    localStorage.removeItem(node.firstChild.innerText);
+    document.getElementById("current-websites").removeChild(node);
   };
 }
 document.addEventListener('DOMContentLoaded', loadCurrentWebsites);
