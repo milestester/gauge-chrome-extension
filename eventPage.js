@@ -54,13 +54,30 @@ function handleActiveTab() {
   });
 }
 
+function sanitize() {
+  tracker.getAllFromLocalStorage(function(allObj) {
+    for(var property in allObj) {
+      if(allObj.hasOwnProperty(property) && property != "currentPageDomain") {
+        var currentSite = allObj[property];
+        var s = new Site(property, currentSite["lastNavigatedTime"], currentSite["datesTracked"]);
+        var datesTracked = currentSite["datesTracked"];
+        var now = new Date();
+        now.setDate(now.getDate()-8);
+        s.removeDay(now.toLocaleDateString());
+        s.saveToLocalStorage();
+      }
+    }
+  });
+}
+
 chrome.tabs.onActivated.addListener(handleActiveTab);
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
   if(changeInfo.status == "complete") {
     handleActiveTab();
   }
 });
-
+chrome.runtime.onStartup.addListener(sanitize);
+chrome.runtime.onInstalled.addListener(sanitize);
 
 // var timeWasteArray = ["www.facebook.com", "twitter.com", "www.youtube.com"];
 // if(!localStorage["timeWasteArray"]) {

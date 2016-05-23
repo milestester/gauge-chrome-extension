@@ -21,8 +21,8 @@ var Site = function(domain, lastNavigatedTime, datesTracked) {
     this.datesTracked.todaysDate += timeToAdd;
   };
   this.removeDay = function(dateToRemove) {
-    if(this.datesTracked.dateToRemove) {
-      delete this.datesTracked.dateToRemove;
+    if(this.datesTracked[dateToRemove]) {
+      delete this.datesTracked[dateToRemove];
     }
   };
   this.getDateData = function(date) {
@@ -43,7 +43,6 @@ var Site = function(domain, lastNavigatedTime, datesTracked) {
       this.datesTracked[now.toLocaleDateString()] = 0;
     }
     this.datesTracked[now.toLocaleDateString()] += (currentActiveTime - this.lastNavigatedTime);
-    // this.saveToLocalStorage();
   };
   this.saveToLocalStorage = function(callback) {
     var outerObj = {};

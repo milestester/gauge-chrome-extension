@@ -10,7 +10,7 @@ Example Local Storage TimeTracker Object
 }
 
 This class links to local storage which holds data about current websites being tracked.
-This is a singleton class, since only one object should ever be created
+This is a singleton class, since only one object should ever be created [is this necessary?]
 */
 
 var TimeTracker = (function() {
