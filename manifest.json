@@ -17,7 +17,7 @@
   ],
 
   "background" : {
-    "scripts": ["eventPage.js"],
+    "scripts": ["TimeTracker.js", "Site.js", "eventPage.js"],
     "persistent": false
   },
 

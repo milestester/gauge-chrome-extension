@@ -15,15 +15,24 @@
         text-align: center;
         display: none;
       }
+      canvas {
+        display: none;
+      }
+      img {
+        cursor: pointer;
+      }
     </style>
+    <script src="TimeTracker.js"></script>
+    <script src="Site.js"></script>
     <script src="Chart.js"></script>
     <script src="popup.js"></script>
     <script src="eventPage.js"></script>
   </head>
   <body>
     <div>
-      <h1> Awesome, No Time Wasted Today! </h1>
-      <canvas id="myChart" width="400" height="400"></canvas>
+      <h1> No Time Tracked Today! </h1>
+      <canvas id="myChart" height="300"></canvas>
+      <img src="settings.png" width="15">
     </div>
   </body>
 </html>
