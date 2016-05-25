@@ -1,29 +1,33 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Time Waste Extension Popup</title>
+    <title>Gauge Extension Popup</title>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300' rel='stylesheet' type='text/css'>
     <style>
       body {
         width: 300px;
         background-color: #ecf0f1;
       }
-      h1 {
-        color: rgb(102,102,102);
-        font-family: 'Helvetica Neue';
-        font-size: 18px;
-        font-weight: normal;
-        text-align: center;
-        display: none;
+      canvas {
+        font-family: 'Roboto', sans-serif;
+      }
+      img {
+        position: absolute;
+        cursor: pointer;
+        right: 5px;
+        top: 14px;
       }
     </style>
+    <script src="TimeTracker.js"></script>
+    <script src="Site.js"></script>
     <script src="Chart.js"></script>
     <script src="popup.js"></script>
     <script src="eventPage.js"></script>
   </head>
   <body>
     <div>
-      <h1> Awesome, No Time Wasted Today! </h1>
-      <canvas id="myChart" width="400" height="400"></canvas>
+      <img src="settings.png" height="25">
+      <canvas id="myChart" height="300"></canvas>
     </div>
   </body>
 </html>

@@ -16,10 +16,14 @@ function buildOptionLabel(labelText) {
 
 function loadCurrentWebsites() {
   document.getElementById("websiteInput").focus();
-  for(var i = 0; i < timeWasteArray.length; i++) {
-    buildOptionLabel(timeWasteArray[i]);
-  }
-  setEventListeners();
+  tracker.getAllFromLocalStorage(function(all) {
+    for(var property in all) {
+      if(all.hasOwnProperty(property) && property != "currentPageDomain" && property != "chromeHasFocus") {
+        buildOptionLabel(property);
+      }
+    }
+    setEventListeners();
+  });
 }
 
 function setEventListeners() {
@@ -28,23 +32,26 @@ function setEventListeners() {
     var keyCode = e.keyCode || e.which;
     if (keyCode == '13'){
       var newURL = this.value;
-      if(timeWasteArray.indexOf(newURL) == -1) {
-        timeWasteArray.push(newURL);
-        buildOptionLabel(newURL);
-        this.value = "";
-        localStorage["timeWasteArray"] = JSON.stringify(timeWasteArray);
-      }
+      var domain = getDomainFromHostName(newURL);
+      var that = this;
+      tracker.getTrackedSite(domain, function(siteObj) {
+        if(siteObj == null) {
+          // Site not currently being tracked
+          tracker.addSite(domain);
+          buildOptionLabel(domain);
+        }
+        that.value = "";
+      });
     }
   }
 }
 
 function deleteItem(node) {
+  var domainText = node.innerText;
   return function(event) {
-    var index = timeWasteArray.indexOf(node.innerText);
-    timeWasteArray.splice(index, 1);
-    localStorage["timeWasteArray"] = JSON.stringify(timeWasteArray);
-    localStorage.removeItem(node.firstChild.innerText);
-    document.getElementById("current-websites").removeChild(node);
+    tracker.removeFromLocalStorage(domainText, function() {
+      document.getElementById("current-websites").removeChild(node);
+    });
   };
 }
 document.addEventListener('DOMContentLoaded', loadCurrentWebsites);

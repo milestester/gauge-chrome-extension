@@ -1,49 +1,65 @@
 document.addEventListener("DOMContentLoaded", function() {
-  var queryInfo = {active: true, currentWindow: true};
-  chrome.tabs.query(queryInfo, function(tabs) {
-    if(tabs.length > 0) {
-      var url = new URL(tabs[0].url);
-      var hostName = url.hostname;
-      if(timeWasteArray.indexOf(hostName) != -1) {
-        var previousPage = localStorage["currentPage"];
-        if(timeWasteArray.indexOf(previousPage) != -1) {
-          var obj = localStorage[previousPage];
-          if(obj) {
-            var now = new Date();
-            var currentActiveTime = now.getTime();
-            obj = JSON.parse(obj);
-            obj[now.toLocaleDateString()] += (currentActiveTime - obj["lastNavigatedTime"]);
-            obj["lastNavigatedTime"] = currentActiveTime;
-            localStorage[previousPage] = JSON.stringify(obj);
-          }
-        }
-      }
-      updatePopup();
+  document.getElementsByTagName("img")[0].addEventListener("click", function(event) {
+    if(chrome.runtime.openOptionsPage) {
+      chrome.runtime.openOptionsPage();
+    } else {
+      window.open(chrome.runtime.getURL('options.html'));
     }
   });
+
+  // Bug here when next day, and lastNavigatedTime is yesterday
+  // When you click on popup, time set to large amount
+
+  tracker.getFromLocalStorage("chromeHasFocus", function(focusBoolean){
+    if(focusBoolean == false) {
+      tracker.saveToLocalStorage("chromeHasFocus", true);
+      handleInactivity(updateCurrentTabOnPopupClick);
+    } else {
+      updateCurrentTabOnPopupClick();
+    }
+  });
+
 });
 
+function updateCurrentTabOnPopupClick() {
+  var queryInfo = {active: true, currentWindow: true};
+  getDomainOfActiveTab(queryInfo, function(activeTabDomain){
+    tracker.getTrackedSite(activeTabDomain, function(siteObj) {
+      if(siteObj != null) {
+        // Tab when extension button pressed is being tracked
+        var now = new Date();
+        var currentActiveTime = now.getTime();
+        siteObj.updateActiveTimeToday(currentActiveTime);
+        siteObj.updateLastNavigatedTime(currentActiveTime);
+        siteObj.saveToLocalStorage(updatePopup);
+      } else {
+        updatePopup();
+      }
+    });
+  });
+}
+
 function updatePopup() {
-  var dataArray = [];
-  var labelArray = [];
-  var dataColorArray = [];
-  var now = new Date();
-  for(var i = 0; i < timeWasteArray.length; i++) {
-    if(!localStorage[timeWasteArray[i]]) continue;
-    var obj = JSON.parse(localStorage[timeWasteArray[i]]);
-    if(obj[now.toLocaleDateString()]) {
-      labelArray.push(timeWasteArray[i]);
-      dataArray.push(obj[now.toLocaleDateString()]);
-      dataColorArray.push(randomColor(1));
+  tracker.getAllFromLocalStorage(function(all) {
+    var dataArray = [];
+    var labelArray = [];
+    var dataColorArray = [];
+    var now = new Date();
+    for(var property in all) {
+      if(all.hasOwnProperty(property) && property != "currentPageDomain" && property != "chromeHasFocus") {
+        var currentSiteObj = all[property];
+        var datesTracked = currentSiteObj["datesTracked"];
+        if(datesTracked[now.toLocaleDateString()]) {
+          dataArray.push(datesTracked[now.toLocaleDateString()]);
+        } else {
+          dataArray.push(100);
+        }
+        labelArray.push(property);
+        dataColorArray.push(randomColor(0.7));
+      }
     }
-  }
-  if(dataArray.length == 0) {
-    document.getElementById("myChart").style.display = "none";
-    document.getElementsByTagName("h1")[0].style.display = "block";
-  } else {
-    document.getElementsByTagName("h1")[0].style.display = "none";
     buildGraph(dataArray, labelArray, dataColorArray);
-  }
+  });
 }
 
 function buildGraph(dataArray, labelArray, dataColorArray) {
@@ -54,36 +70,29 @@ function buildGraph(dataArray, labelArray, dataColorArray) {
       {
         data: dataArray,
         borderWidth: 3,
-        // backgroundColor: [
-        //   "#FF6384",
-        //   "#36A2EB",
-        //   "#FFCE56"
-        // ],
         backgroundColor: dataColorArray,
-        // hoverBackgroundColor: [
-        //   "#FF6384",
-        //   "#36A2EB",
-        //   "#FFCE56"
-        // ]
         hoverBackgroundColor: dataColorArray
       }]
   };
   var options = {
     responsive: true,
+    defaultFontFamily: "Roboto",
     title: {
       display: true,
       text: "Time Spent Today",
       fontSize: 18,
-      fontFamily: "Helvetica Neue",
-      fontStyle: "normal"
+      fontFamily: "Roboto",
+      fontStyle: "normal",
+      fontColor: "rgb(117,117,117)"
     },
     legend: {
       position: "bottom",
       fullWidth: true,
       labels: {
         fontSize: 14,
-        fontFamily: "Helvetica Neue",
-        fontStyle: "normal"
+        fontFamily: "Roboto",
+        fontStyle: "normal",
+        fontColor: "rgb(117,117,117)"
       }
     },
     tooltips: {
