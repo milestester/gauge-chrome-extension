@@ -18,7 +18,7 @@ function loadCurrentWebsites() {
   document.getElementById("websiteInput").focus();
   tracker.getAllFromLocalStorage(function(all) {
     for(var property in all) {
-      if(all.hasOwnProperty(property) && property != "currentPageDomain") {
+      if(all.hasOwnProperty(property) && property != "currentPageDomain" && property != "chromeHasFocus") {
         buildOptionLabel(property);
       }
     }

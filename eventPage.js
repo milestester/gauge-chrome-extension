@@ -14,8 +14,7 @@ function getDomainFromHostName(hostName) {
   }
 }
 
-function getDomainOfActiveTab(callback) {
-  var queryInfo = {active: true, currentWindow: true};
+function getDomainOfActiveTab(queryInfo, callback) {
   chrome.tabs.query(queryInfo, function(tabs) {
     if(tabs.length > 0) {
       var url = new URL(tabs[0].url);
@@ -27,7 +26,8 @@ function getDomainOfActiveTab(callback) {
 }
 
 function handleActiveTab() {
-  getDomainOfActiveTab(function(activeTabDomain) {
+  var queryInfo = {active: true, currentWindow: true};
+  getDomainOfActiveTab(queryInfo, function(activeTabDomain) {
     tracker.getCurrentPageDomain(function(previousPageDomain) {
       if(previousPageDomain && (activeTabDomain != previousPageDomain)) {
         var now = new Date();
@@ -57,7 +57,7 @@ function handleActiveTab() {
 function sanitize() {
   tracker.getAllFromLocalStorage(function(allObj) {
     for(var property in allObj) {
-      if(allObj.hasOwnProperty(property) && property != "currentPageDomain") {
+      if(allObj.hasOwnProperty(property) && property != "currentPageDomain" && property != "chromeHasFocus") {
         var currentSite = allObj[property];
         var s = new Site(property, currentSite["lastNavigatedTime"], currentSite["datesTracked"]);
         var datesTracked = currentSite["datesTracked"];
@@ -70,14 +70,60 @@ function sanitize() {
   });
 }
 
-chrome.tabs.onActivated.addListener(handleActiveTab);
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-  if(changeInfo.status == "complete") {
-    handleActiveTab();
-  }
-});
+// Hack to get around focus change not firing again when chrome comes into focus
+function checkForInactivity() {
+  tracker.getFromLocalStorage("chromeHasFocus", function(focusBoolean){
+    if(focusBoolean == false) {
+      tracker.saveToLocalStorage("chromeHasFocus", true);
+      handleInactivity(handleActiveTab);
+    } else {
+      handleActiveTab();
+    }
+  });
+}
+
+// When click off, then click back on another tab, previous page
+// is set to new one..
+function handleInactivity(callback) {
+  tracker.getCurrentPageDomain(function(previousPageDomain) {
+    if(previousPageDomain) {
+      tracker.getTrackedSite(previousPageDomain, function(prevSiteObj) {
+        if(prevSiteObj) {
+          var now = new Date();
+          var currentActiveTime = now.getTime();
+          prevSiteObj.updateLastNavigatedTime(currentActiveTime);
+          prevSiteObj.saveToLocalStorage();
+        }
+      });
+    }
+    if(callback) {
+      callback();
+    }
+  });
+}
+
+// chrome.tabs.onActivated.addListener(handleActiveTab);
+// chrome.tabs.onUpdated.addListener(handleActiveTab);
+chrome.tabs.onActivated.addListener(checkForInactivity);
+chrome.tabs.onUpdated.addListener(checkForInactivity);
 chrome.runtime.onStartup.addListener(sanitize);
 chrome.runtime.onInstalled.addListener(sanitize);
+chrome.windows.onFocusChanged.addListener(function(windowId){
+  console.log(windowId);
+  if(windowId == chrome.windows.WINDOW_ID_NONE) {
+    tracker.saveToLocalStorage("chromeHasFocus", false);
+  } else {
+    tracker.saveToLocalStorage("chromeHasFocus", true);
+    handleInactivity();
+  }
+});
+
+chrome.idle.setDetectionInterval(15);
+chrome.idle.onStateChanged.addListener(function(state) {
+  if(state == "active") {
+    handleInactivity();
+  }
+});
 
 // var timeWasteArray = ["www.facebook.com", "twitter.com", "www.youtube.com"];
 // if(!localStorage["timeWasteArray"]) {

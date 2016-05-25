@@ -1,25 +1,21 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Time Waste Extension Popup</title>
+    <title>Gauge Extension Popup</title>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300' rel='stylesheet' type='text/css'>
     <style>
       body {
         width: 300px;
         background-color: #ecf0f1;
       }
-      h1 {
-        color: rgb(102,102,102);
-        font-family: 'Helvetica Neue';
-        font-size: 18px;
-        font-weight: normal;
-        text-align: center;
-        display: none;
-      }
       canvas {
-        display: none;
+        font-family: 'Roboto', sans-serif;
       }
       img {
+        position: absolute;
         cursor: pointer;
+        right: 5px;
+        top: 14px;
       }
     </style>
     <script src="TimeTracker.js"></script>
@@ -30,9 +26,8 @@
   </head>
   <body>
     <div>
-      <h1> No Time Tracked Today! </h1>
+      <img src="settings.png" height="25">
       <canvas id="myChart" height="300"></canvas>
-      <img src="settings.png" width="15">
     </div>
   </body>
 </html>

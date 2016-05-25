@@ -7,7 +7,23 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 
-  getDomainOfActiveTab(function(activeTabDomain){
+  // Bug here when next day, and lastNavigatedTime is yesterday
+  // When you click on popup, time set to large amount
+
+  tracker.getFromLocalStorage("chromeHasFocus", function(focusBoolean){
+    if(focusBoolean == false) {
+      tracker.saveToLocalStorage("chromeHasFocus", true);
+      handleInactivity(updateCurrentTabOnPopupClick);
+    } else {
+      updateCurrentTabOnPopupClick();
+    }
+  });
+
+});
+
+function updateCurrentTabOnPopupClick() {
+  var queryInfo = {active: true, currentWindow: true};
+  getDomainOfActiveTab(queryInfo, function(activeTabDomain){
     tracker.getTrackedSite(activeTabDomain, function(siteObj) {
       if(siteObj != null) {
         // Tab when extension button pressed is being tracked
@@ -21,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     });
   });
-});
+}
 
 function updatePopup() {
   tracker.getAllFromLocalStorage(function(all) {
@@ -30,25 +46,19 @@ function updatePopup() {
     var dataColorArray = [];
     var now = new Date();
     for(var property in all) {
-      if(all.hasOwnProperty(property) && property != "currentPageDomain") {
+      if(all.hasOwnProperty(property) && property != "currentPageDomain" && property != "chromeHasFocus") {
         var currentSiteObj = all[property];
         var datesTracked = currentSiteObj["datesTracked"];
-        // if(datesTracked[now.toLocaleDateString()] && datesTracked[now.toLocaleDateString()] > 0){
         if(datesTracked[now.toLocaleDateString()]) {
-          labelArray.push(property);
           dataArray.push(datesTracked[now.toLocaleDateString()]);
-          dataColorArray.push(randomColor(1));
+        } else {
+          dataArray.push(100);
         }
+        labelArray.push(property);
+        dataColorArray.push(randomColor(0.7));
       }
     }
-    if(dataArray.length == 0) {
-      // document.getElementById("myChart").style.display = "none";
-      document.getElementsByTagName("h1")[0].style.display = "block";
-    } else {
-      document.getElementsByTagName("h1")[0].style.display = "none";
-      document.getElementById("myChart").style.display = "block";
-      buildGraph(dataArray, labelArray, dataColorArray);
-    }
+    buildGraph(dataArray, labelArray, dataColorArray);
   });
 }
 
@@ -60,36 +70,29 @@ function buildGraph(dataArray, labelArray, dataColorArray) {
       {
         data: dataArray,
         borderWidth: 3,
-        // backgroundColor: [
-        //   "#FF6384",
-        //   "#36A2EB",
-        //   "#FFCE56"
-        // ],
         backgroundColor: dataColorArray,
-        // hoverBackgroundColor: [
-        //   "#FF6384",
-        //   "#36A2EB",
-        //   "#FFCE56"
-        // ]
         hoverBackgroundColor: dataColorArray
       }]
   };
   var options = {
     responsive: true,
+    defaultFontFamily: "Roboto",
     title: {
       display: true,
       text: "Time Spent Today",
       fontSize: 18,
-      fontFamily: "Helvetica Neue",
-      fontStyle: "normal"
+      fontFamily: "Roboto",
+      fontStyle: "normal",
+      fontColor: "rgb(117,117,117)"
     },
     legend: {
       position: "bottom",
       fullWidth: true,
       labels: {
         fontSize: 14,
-        fontFamily: "Helvetica Neue",
-        fontStyle: "normal"
+        fontFamily: "Roboto",
+        fontStyle: "normal",
+        fontColor: "rgb(117,117,117)"
       }
     },
     tooltips: {
