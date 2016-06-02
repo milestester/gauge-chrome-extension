@@ -51,9 +51,9 @@ var Site = function(domain, lastNavigatedTime, datesTracked) {
     innerObj["lastNavigatedTime"] = this.lastNavigatedTime;
     innerObj["datesTracked"] = this.datesTracked;
     outerObj[this.domain] = innerObj;
-    chrome.storage.sync.set(outerObj, callback);
+    LocalStorageManager.saveObj(outerObj, callback);
   };
   this.removeFromLocalStorage = function(site, callback) {
-    chrome.storage.sync.remove(site.getDomain(), callback);
+    LocalStorageManager.remove(site.getDomain(), callback);
   };
 }

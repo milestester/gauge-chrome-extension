@@ -1,129 +1,131 @@
 
-var tracker = TimeTracker.getInstance();
+// var tracker = TimeTracker.getInstance();
 
 function objectEmpty(obj) {
  return (Object.keys(obj).length === 0 && obj.constructor === Object);
 }
 
-function getDomainFromHostName(hostName) {
-  var splitHostName = hostName.split("www.")
-  if(splitHostName.length == 1) {
-    return splitHostName[0];
-  } else if(splitHostName.length == 2) {
-    return splitHostName[1];
-  }
-}
+// function getDomainFromHostName(hostName) {
+//   var splitHostName = hostName.split("www.")
+//   if(splitHostName.length == 1) {
+//     return splitHostName[0];
+//   } else if(splitHostName.length == 2) {
+//     return splitHostName[1];
+//   }
+// }
 
-function getDomainOfActiveTab(queryInfo, callback) {
-  chrome.tabs.query(queryInfo, function(tabs) {
-    if(tabs.length > 0) {
-      var url = new URL(tabs[0].url);
-      var hostName = url.hostname;
-      var domain = getDomainFromHostName(hostName);
-      callback(domain);
-    }
-  });
-}
+// function getDomainOfActiveTab(queryInfo, callback) {
+//   chrome.tabs.query(queryInfo, function(tabs) {
+//     if(tabs.length > 0) {
+//       var url = new URL(tabs[0].url);
+//       var hostName = url.hostname;
+//       var domain = getDomainFromHostName(hostName);
+//       callback(domain);
+//     }
+//   });
+// }
 
-function handleActiveTab() {
-  var queryInfo = {active: true, currentWindow: true};
-  getDomainOfActiveTab(queryInfo, function(activeTabDomain) {
-    tracker.getCurrentPageDomain(function(previousPageDomain) {
-      if(previousPageDomain && (activeTabDomain != previousPageDomain)) {
-        var now = new Date();
-        var currentActiveTime = now.getTime();
-        tracker.getTrackedSite(activeTabDomain, function(siteObj) {
-          if(siteObj != null) {
-            // Current active tab is being tracked
-            siteObj.updateLastNavigatedTime(currentActiveTime);
-            siteObj.saveToLocalStorage();
-          } else {
-            // Current active tab not being tracked
-            tracker.getTrackedSite(previousPageDomain, function(prevTabSiteObj){
-              if(prevTabSiteObj != null) {
-                // Previous tab was being tracked, so update its active time for today
-                prevTabSiteObj.updateActiveTimeToday(currentActiveTime);
-                prevTabSiteObj.saveToLocalStorage();
-              }
-            });
-          }
-        });
-      }
-      tracker.setCurrentPageDomain(activeTabDomain);
-    });
-  });
-}
+// function handleActiveTab() {
+//   var queryInfo = {active: true, currentWindow: true};
+//   getDomainOfActiveTab(queryInfo, function(activeTabDomain) {
+//     tracker.getCurrentPageDomain(function(previousPageDomain) {
+//       if(previousPageDomain && (activeTabDomain != previousPageDomain)) {
+//         var now = new Date();
+//         var currentActiveTime = now.getTime();
+//         tracker.getTrackedSite(activeTabDomain, function(siteObj) {
+//           if(siteObj != null) {
+//             // Current active tab is being tracked
+//             siteObj.updateLastNavigatedTime(currentActiveTime);
+//             siteObj.saveToLocalStorage();
+//           } else {
+//             // Current active tab not being tracked
+//             tracker.getTrackedSite(previousPageDomain, function(prevTabSiteObj){
+//               if(prevTabSiteObj != null) {
+//                 // Previous tab was being tracked, so update its active time for today
+//                 prevTabSiteObj.updateActiveTimeToday(currentActiveTime);
+//                 prevTabSiteObj.saveToLocalStorage();
+//               }
+//             });
+//           }
+//         });
+//       }
+//       tracker.setCurrentPageDomain(activeTabDomain);
+//     });
+//   });
+// }
 
-function sanitize() {
-  tracker.getAllFromLocalStorage(function(allObj) {
-    for(var property in allObj) {
-      if(allObj.hasOwnProperty(property) && property != "currentPageDomain" && property != "chromeHasFocus") {
-        var currentSite = allObj[property];
-        var s = new Site(property, currentSite["lastNavigatedTime"], currentSite["datesTracked"]);
-        var datesTracked = currentSite["datesTracked"];
-        var now = new Date();
-        now.setDate(now.getDate()-8);
-        s.removeDay(now.toLocaleDateString());
-        s.saveToLocalStorage();
-      }
-    }
-  });
-}
+// function sanitize() {
+//   tracker.getAllFromLocalStorage(function(allObj) {
+//     for(var property in allObj) {
+//       if(allObj.hasOwnProperty(property) && property != "currentPageDomain" && property != "chromeHasFocus") {
+//         var currentSite = allObj[property];
+//         var s = new Site(property, currentSite["lastNavigatedTime"], currentSite["datesTracked"]);
+//         var datesTracked = currentSite["datesTracked"];
+//         var now = new Date();
+//         now.setDate(now.getDate()-8);
+//         s.removeDay(now.toLocaleDateString());
+//         s.saveToLocalStorage();
+//       }
+//     }
+//   });
+// }
 
 // Hack to get around focus change not firing again when chrome comes into focus
-function checkForInactivity() {
-  tracker.getFromLocalStorage("chromeHasFocus", function(focusBoolean){
-    if(focusBoolean == false) {
-      tracker.saveToLocalStorage("chromeHasFocus", true);
-      handleInactivity(handleActiveTab);
-    } else {
-      handleActiveTab();
-    }
-  });
-}
+// function checkForInactivity() {
+//   tracker.getFromLocalStorage("chromeHasFocus", function(focusBoolean){
+//     if(focusBoolean == false) {
+//       tracker.saveToLocalStorage("chromeHasFocus", true);
+//       handleInactivity(handleActiveTab);
+//     } else {
+//       handleActiveTab();
+//     }
+//   });
+// }
 
-// When click off, then click back on another tab, previous page
-// is set to new one..
-function handleInactivity(callback) {
-  tracker.getCurrentPageDomain(function(previousPageDomain) {
-    if(previousPageDomain) {
-      tracker.getTrackedSite(previousPageDomain, function(prevSiteObj) {
-        if(prevSiteObj) {
-          var now = new Date();
-          var currentActiveTime = now.getTime();
-          prevSiteObj.updateLastNavigatedTime(currentActiveTime);
-          prevSiteObj.saveToLocalStorage();
-        }
-      });
-    }
-    if(callback) {
-      callback();
-    }
-  });
-}
+// // When click off, then click back on another tab, previous page
+// // is set to new one..
+// function handleInactivity(callback) {
+//   tracker.getCurrentPageDomain(function(previousPageDomain) {
+//     if(previousPageDomain) {
+//       tracker.getTrackedSite(previousPageDomain, function(prevSiteObj) {
+//         if(prevSiteObj) {
+//           var now = new Date();
+//           var currentActiveTime = now.getTime();
+//           prevSiteObj.updateLastNavigatedTime(currentActiveTime);
+//           prevSiteObj.saveToLocalStorage();
+//         }
+//       });
+//     }
+//     if(callback) {
+//       callback();
+//     }
+//   });
+// }
 
 // chrome.tabs.onActivated.addListener(handleActiveTab);
 // chrome.tabs.onUpdated.addListener(handleActiveTab);
-chrome.tabs.onActivated.addListener(checkForInactivity);
-chrome.tabs.onUpdated.addListener(checkForInactivity);
-chrome.runtime.onStartup.addListener(sanitize);
-chrome.runtime.onInstalled.addListener(sanitize);
-chrome.windows.onFocusChanged.addListener(function(windowId){
-  console.log(windowId);
-  if(windowId == chrome.windows.WINDOW_ID_NONE) {
-    tracker.saveToLocalStorage("chromeHasFocus", false);
-  } else {
-    tracker.saveToLocalStorage("chromeHasFocus", true);
-    handleInactivity();
-  }
-});
+// chrome.tabs.onActivated.addListener(checkForInactivity);
+// chrome.tabs.onUpdated.addListener(checkForInactivity);
+chrome.tabs.onActivated.addListener(TimeTrackerUpdated.handleActiveTab);
+chrome.tabs.onUpdated.addListener(TimeTrackerUpdated.handleActiveTab);
+chrome.runtime.onStartup.addListener(TimeTrackerUpdated.sanitizeWeeklyData);
+chrome.runtime.onInstalled.addListener(TimeTrackerUpdated.sanitizeWeeklyData);
+// chrome.windows.onFocusChanged.addListener(function(windowId){
+//   console.log(windowId);
+//   if(windowId == chrome.windows.WINDOW_ID_NONE) {
+//     tracker.saveToLocalStorage("chromeHasFocus", false);
+//   } else {
+//     tracker.saveToLocalStorage("chromeHasFocus", true);
+//     handleInactivity();
+//   }
+// });
 
-chrome.idle.setDetectionInterval(15);
-chrome.idle.onStateChanged.addListener(function(state) {
-  if(state == "active") {
-    handleInactivity();
-  }
-});
+// chrome.idle.setDetectionInterval(15);
+// chrome.idle.onStateChanged.addListener(function(state) {
+//   if(state == "active") {
+//     handleInactivity();
+//   }
+// });
 
 // var timeWasteArray = ["www.facebook.com", "twitter.com", "www.youtube.com"];
 // if(!localStorage["timeWasteArray"]) {

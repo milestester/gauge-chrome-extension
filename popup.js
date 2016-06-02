@@ -9,23 +9,25 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Bug here when next day, and lastNavigatedTime is yesterday
   // When you click on popup, time set to large amount
+  updateCurrentTabOnPopupClick();
 
-  tracker.getFromLocalStorage("chromeHasFocus", function(focusBoolean){
-    if(focusBoolean == false) {
-      tracker.saveToLocalStorage("chromeHasFocus", true);
-      handleInactivity(updateCurrentTabOnPopupClick);
-    } else {
-      updateCurrentTabOnPopupClick();
-    }
-  });
+  // tracker.getFromLocalStorage("chromeHasFocus", function(focusBoolean){
+  //   if(focusBoolean == false) {
+  //     tracker.saveToLocalStorage("chromeHasFocus", true);
+  //     handleInactivity(updateCurrentTabOnPopupClick);
+  //   } else {
+  //     updateCurrentTabOnPopupClick();
+  //   }
+  // });
 
 });
 
 function updateCurrentTabOnPopupClick() {
   var queryInfo = {active: true, currentWindow: true};
-  getDomainOfActiveTab(queryInfo, function(activeTabDomain){
-    tracker.getTrackedSite(activeTabDomain, function(siteObj) {
+  TimeTrackerUpdated.getDomainOfActiveTab(queryInfo, function(activeTabDomain){
+    LocalStorageManager.getSingleKey(activeTabDomain, function(siteObj) {
       if(siteObj != null) {
+        siteObj = new Site(activeTabDomain, siteObj["lastNavigatedTime"], siteObj["datesTracked"]);
         // Tab when extension button pressed is being tracked
         var now = new Date();
         var currentActiveTime = now.getTime();
@@ -39,8 +41,49 @@ function updateCurrentTabOnPopupClick() {
   });
 }
 
+// function updateCurrentTabOnPopupClick() {
+//   var queryInfo = {active: true, currentWindow: true};
+//   getDomainOfActiveTab(queryInfo, function(activeTabDomain){
+//     tracker.getTrackedSite(activeTabDomain, function(siteObj) {
+//       if(siteObj != null) {
+//         // Tab when extension button pressed is being tracked
+//         var now = new Date();
+//         var currentActiveTime = now.getTime();
+//         siteObj.updateActiveTimeToday(currentActiveTime);
+//         siteObj.updateLastNavigatedTime(currentActiveTime);
+//         siteObj.saveToLocalStorage(updatePopup);
+//       } else {
+//         updatePopup();
+//       }
+//     });
+//   });
+// }
+
+// function updatePopup() {
+//   tracker.getAllFromLocalStorage(function(all) {
+//     var dataArray = [];
+//     var labelArray = [];
+//     var dataColorArray = [];
+//     var now = new Date();
+//     for(var property in all) {
+//       if(all.hasOwnProperty(property) && property != "currentPageDomain" && property != "chromeHasFocus") {
+//         var currentSiteObj = all[property];
+//         var datesTracked = currentSiteObj["datesTracked"];
+//         if(datesTracked[now.toLocaleDateString()]) {
+//           dataArray.push(datesTracked[now.toLocaleDateString()]);
+//         } else {
+//           dataArray.push(100);
+//         }
+//         labelArray.push(property);
+//         dataColorArray.push(randomColor(0.7));
+//       }
+//     }
+//     buildGraph(dataArray, labelArray, dataColorArray);
+//   });
+// }
+
 function updatePopup() {
-  tracker.getAllFromLocalStorage(function(all) {
+  LocalStorageManager.getMultipleKeys(null, function(all) {
     var dataArray = [];
     var labelArray = [];
     var dataColorArray = [];
@@ -61,7 +104,6 @@ function updatePopup() {
     buildGraph(dataArray, labelArray, dataColorArray);
   });
 }
-
 function buildGraph(dataArray, labelArray, dataColorArray) {
   var ctx = document.getElementById("myChart");
   var data = {

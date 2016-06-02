@@ -18,7 +18,7 @@
   },
 
   "background" : {
-    "scripts": ["TimeTracker.js", "Site.js", "eventPage.js"],
+    "scripts": ["LocalStorageManager.js", "TimeTracker.js", "Site.js", "eventPage.js"],
     "persistent": false
   },
 

@@ -16,7 +16,7 @@ function buildOptionLabel(labelText) {
 
 function loadCurrentWebsites() {
   document.getElementById("websiteInput").focus();
-  tracker.getAllFromLocalStorage(function(all) {
+  LocalStorageManager.getMultipleKeys(null, function(all) {
     for(var property in all) {
       if(all.hasOwnProperty(property) && property != "currentPageDomain" && property != "chromeHasFocus") {
         buildOptionLabel(property);
@@ -32,12 +32,13 @@ function setEventListeners() {
     var keyCode = e.keyCode || e.which;
     if (keyCode == '13'){
       var newURL = this.value;
-      var domain = getDomainFromHostName(newURL);
+      var domain = TimeTrackerUpdated.getDomainFromHostName(newURL);
       var that = this;
-      tracker.getTrackedSite(domain, function(siteObj) {
+      LocalStorageManager.getSingleKey(domain, function(siteObj) {
         if(siteObj == null) {
           // Site not currently being tracked
-          tracker.addSite(domain);
+          var site = new Site(domain, undefined, {});
+          site.saveToLocalStorage();
           buildOptionLabel(domain);
         }
         that.value = "";
@@ -49,7 +50,7 @@ function setEventListeners() {
 function deleteItem(node) {
   var domainText = node.innerText;
   return function(event) {
-    tracker.removeFromLocalStorage(domainText, function() {
+    LocalStorageManager.remove(domainText, function() {
       document.getElementById("current-websites").removeChild(node);
     });
   };

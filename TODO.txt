@@ -1,0 +1,43 @@
+Objects/Classes
+
+LocalStorageManager.js
+  - Interfaces between the extenion and chrome sync local storage
+Methods
+  - save(key, data, callback)
+  - getSingleKey(key, callback)
+  - getMultipleKeys(callback)
+  - removeFromLocalStorage(key, callback)
+
+TimeTracker.js
+  - This will contain all methods that are required to track time spend on tabs
+Methods
+  - handleActiveTab()
+  - getDomainOfActiveTab(queryInfo, callback)
+  - sanitize()
+  - checkForInactivity()
+  - handleInactivity(callback)
+
+Site.js
+  -
+  -
+  -
+
+
+ ---------------------
+|                     |
+| LocalStorageManager |   <--------Interfaces-------->  Local Storage
+|                     |
+ ---------------------
+          |
+          |
+          |
+          |
+          |
+          |
+ ---------------------                                  ---------------------
+|                     |                                |                     |
+|     TimeTracker     |   <------------------------->  |        Site         |
+|                     |                                |                     |
+ ---------------------                                  ---------------------
+
+
