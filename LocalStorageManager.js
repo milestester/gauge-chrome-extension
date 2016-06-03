@@ -20,7 +20,7 @@ var LocalStorageManager = {
 
   getSingleKey: function(key, callback) {
     chrome.storage.sync.get(key, function(obj) {
-      if(objectEmpty(obj)) {
+      if(LocalStorageManager.objectEmpty(obj)) {
         callback(null);
       } else {
         callback(obj[key]);
@@ -30,12 +30,16 @@ var LocalStorageManager = {
 
   getMultipleKeys: function(keyArray, callback) {
     chrome.storage.sync.get(keyArray, function(obj) {
-      if(objectEmpty(obj)) {
+      if(LocalStorageManager.objectEmpty(obj)) {
         callback(null);
       } else {
         callback(obj);
       }
     });
+  },
+
+  objectEmpty: function(obj) {
+    return (Object.keys(obj).length === 0 && obj.constructor === Object);
   }
 
 };
