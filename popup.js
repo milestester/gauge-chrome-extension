@@ -1,4 +1,20 @@
 document.addEventListener("DOMContentLoaded", function() {
+  openOptionsPane();
+  // Bug here when next day, and lastNavigatedTime is yesterday
+  // When you click on popup, time set to large amount?
+  updateCurrentTabOnPopupClick();
+  LocalStorageManager.getSingleKey("chromeHasFocus", function(chromeHasFocus) {
+    if(chromeHasFocus) {
+      updateCurrentTabOnPopupClick();
+    } else {
+      LocalStorageManager.save("chromeHasFocus", true);
+      TimeTracker.handleInactivity(updateCurrentTabOnPopupClick);
+    }
+  });
+
+});
+
+function openOptionsPane() {
   document.getElementsByTagName("img")[0].addEventListener("click", function(event) {
     if(chrome.runtime.openOptionsPage) {
       chrome.runtime.openOptionsPage();
@@ -6,26 +22,14 @@ document.addEventListener("DOMContentLoaded", function() {
       window.open(chrome.runtime.getURL('options.html'));
     }
   });
-
-  // Bug here when next day, and lastNavigatedTime is yesterday
-  // When you click on popup, time set to large amount
-
-  tracker.getFromLocalStorage("chromeHasFocus", function(focusBoolean){
-    if(focusBoolean == false) {
-      tracker.saveToLocalStorage("chromeHasFocus", true);
-      handleInactivity(updateCurrentTabOnPopupClick);
-    } else {
-      updateCurrentTabOnPopupClick();
-    }
-  });
-
-});
+}
 
 function updateCurrentTabOnPopupClick() {
   var queryInfo = {active: true, currentWindow: true};
-  getDomainOfActiveTab(queryInfo, function(activeTabDomain){
-    tracker.getTrackedSite(activeTabDomain, function(siteObj) {
+  TimeTracker.getDomainOfActiveTab(queryInfo, function(activeTabDomain){
+    LocalStorageManager.getSingleKey(activeTabDomain, function(siteObj) {
       if(siteObj != null) {
+        siteObj = new Site(activeTabDomain, siteObj["lastNavigatedTime"], siteObj["datesTracked"]);
         // Tab when extension button pressed is being tracked
         var now = new Date();
         var currentActiveTime = now.getTime();
@@ -40,7 +44,7 @@ function updateCurrentTabOnPopupClick() {
 }
 
 function updatePopup() {
-  tracker.getAllFromLocalStorage(function(all) {
+  LocalStorageManager.getMultipleKeys(null, function(all) {
     var dataArray = [];
     var labelArray = [];
     var dataColorArray = [];
@@ -134,6 +138,7 @@ function msToTime(duration) {
 var randomColorFactor = function() {
   return Math.round(Math.random() * 255);
 };
+
 var randomColor = function(opacity) {
   return 'rgba(' + randomColorFactor() + ',' + randomColorFactor() + ',' + randomColorFactor() + ',' + (opacity || '.3') + ')';
 };
