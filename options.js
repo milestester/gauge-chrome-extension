@@ -26,13 +26,14 @@ function loadCurrentWebsites() {
   });
 }
 
+// TODO: validate entered URL
 function setEventListeners() {
   document.getElementById("websiteInput").onkeypress = function(e){
     if (!e) e = window.event;
     var keyCode = e.keyCode || e.which;
     if (keyCode == '13'){
       var newURL = this.value;
-      var domain = TimeTrackerUpdated.getDomainFromHostName(newURL);
+      var domain = TimeTracker.getDomainFromHostName(newURL);
       var that = this;
       LocalStorageManager.getSingleKey(domain, function(siteObj) {
         if(siteObj == null) {
@@ -55,4 +56,5 @@ function deleteItem(node) {
     });
   };
 }
+
 document.addEventListener('DOMContentLoaded', loadCurrentWebsites);

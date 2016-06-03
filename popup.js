@@ -1,4 +1,20 @@
 document.addEventListener("DOMContentLoaded", function() {
+  openOptionsPane();
+  // Bug here when next day, and lastNavigatedTime is yesterday
+  // When you click on popup, time set to large amount?
+  updateCurrentTabOnPopupClick();
+  LocalStorageManager.getSingleKey("chromeHasFocus", function(chromeHasFocus) {
+    if(chromeHasFocus) {
+      updateCurrentTabOnPopupClick();
+    } else {
+      LocalStorageManager.save("chromeHasFocus", true);
+      TimeTracker.handleInactivity(updateCurrentTabOnPopupClick);
+    }
+  });
+
+});
+
+function openOptionsPane() {
   document.getElementsByTagName("img")[0].addEventListener("click", function(event) {
     if(chrome.runtime.openOptionsPage) {
       chrome.runtime.openOptionsPage();
@@ -6,25 +22,11 @@ document.addEventListener("DOMContentLoaded", function() {
       window.open(chrome.runtime.getURL('options.html'));
     }
   });
-
-  // Bug here when next day, and lastNavigatedTime is yesterday
-  // When you click on popup, time set to large amount
-  updateCurrentTabOnPopupClick();
-
-  // tracker.getFromLocalStorage("chromeHasFocus", function(focusBoolean){
-  //   if(focusBoolean == false) {
-  //     tracker.saveToLocalStorage("chromeHasFocus", true);
-  //     handleInactivity(updateCurrentTabOnPopupClick);
-  //   } else {
-  //     updateCurrentTabOnPopupClick();
-  //   }
-  // });
-
-});
+}
 
 function updateCurrentTabOnPopupClick() {
   var queryInfo = {active: true, currentWindow: true};
-  TimeTrackerUpdated.getDomainOfActiveTab(queryInfo, function(activeTabDomain){
+  TimeTracker.getDomainOfActiveTab(queryInfo, function(activeTabDomain){
     LocalStorageManager.getSingleKey(activeTabDomain, function(siteObj) {
       if(siteObj != null) {
         siteObj = new Site(activeTabDomain, siteObj["lastNavigatedTime"], siteObj["datesTracked"]);
@@ -40,47 +42,6 @@ function updateCurrentTabOnPopupClick() {
     });
   });
 }
-
-// function updateCurrentTabOnPopupClick() {
-//   var queryInfo = {active: true, currentWindow: true};
-//   getDomainOfActiveTab(queryInfo, function(activeTabDomain){
-//     tracker.getTrackedSite(activeTabDomain, function(siteObj) {
-//       if(siteObj != null) {
-//         // Tab when extension button pressed is being tracked
-//         var now = new Date();
-//         var currentActiveTime = now.getTime();
-//         siteObj.updateActiveTimeToday(currentActiveTime);
-//         siteObj.updateLastNavigatedTime(currentActiveTime);
-//         siteObj.saveToLocalStorage(updatePopup);
-//       } else {
-//         updatePopup();
-//       }
-//     });
-//   });
-// }
-
-// function updatePopup() {
-//   tracker.getAllFromLocalStorage(function(all) {
-//     var dataArray = [];
-//     var labelArray = [];
-//     var dataColorArray = [];
-//     var now = new Date();
-//     for(var property in all) {
-//       if(all.hasOwnProperty(property) && property != "currentPageDomain" && property != "chromeHasFocus") {
-//         var currentSiteObj = all[property];
-//         var datesTracked = currentSiteObj["datesTracked"];
-//         if(datesTracked[now.toLocaleDateString()]) {
-//           dataArray.push(datesTracked[now.toLocaleDateString()]);
-//         } else {
-//           dataArray.push(100);
-//         }
-//         labelArray.push(property);
-//         dataColorArray.push(randomColor(0.7));
-//       }
-//     }
-//     buildGraph(dataArray, labelArray, dataColorArray);
-//   });
-// }
 
 function updatePopup() {
   LocalStorageManager.getMultipleKeys(null, function(all) {
@@ -104,6 +65,7 @@ function updatePopup() {
     buildGraph(dataArray, labelArray, dataColorArray);
   });
 }
+
 function buildGraph(dataArray, labelArray, dataColorArray) {
   var ctx = document.getElementById("myChart");
   var data = {
@@ -176,6 +138,7 @@ function msToTime(duration) {
 var randomColorFactor = function() {
   return Math.round(Math.random() * 255);
 };
+
 var randomColor = function(opacity) {
   return 'rgba(' + randomColorFactor() + ',' + randomColorFactor() + ',' + randomColorFactor() + ',' + (opacity || '.3') + ')';
 };

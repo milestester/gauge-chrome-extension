@@ -9,7 +9,8 @@
     "tabs",
     "activeTab",
     "storage",
-    "idle"
+    "idle",
+    "alarms"
   ],
 
   "browser_action": {

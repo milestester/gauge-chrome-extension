@@ -14,29 +14,36 @@ var Site = function(domain, lastNavigatedTime, datesTracked) {
   this.domain = domain;
   this.lastNavigatedTime = lastNavigatedTime;
   this.datesTracked = datesTracked;
+
   this.addToday = function(todaysDate, timeToAdd) {
     if(!this.datesTracked.todaysDate) {
       this.datesTracked.todaysDate = 0;
     }
     this.datesTracked.todaysDate += timeToAdd;
   };
+
   this.removeDay = function(dateToRemove) {
     if(this.datesTracked[dateToRemove]) {
       delete this.datesTracked[dateToRemove];
     }
   };
+
   this.getDateData = function(date) {
     return this.datesTracked.date;
   };
+
   this.getDomain = function() {
     return this.domain;
   };
+
   this.getLastNavigatedTime = function() {
     return this.lastNavigatedTime;
   };
+
   this.updateLastNavigatedTime = function(newTime) {
     this.lastNavigatedTime = newTime;
   };
+
   this.updateActiveTimeToday = function(currentActiveTime) {
     var now = new Date();
     if(!this.datesTracked[now.toLocaleDateString()]) {
@@ -44,6 +51,7 @@ var Site = function(domain, lastNavigatedTime, datesTracked) {
     }
     this.datesTracked[now.toLocaleDateString()] += (currentActiveTime - this.lastNavigatedTime);
   };
+
   this.saveToLocalStorage = function(callback) {
     var outerObj = {};
     var innerObj = {};
@@ -53,6 +61,7 @@ var Site = function(domain, lastNavigatedTime, datesTracked) {
     outerObj[this.domain] = innerObj;
     LocalStorageManager.saveObj(outerObj, callback);
   };
+
   this.removeFromLocalStorage = function(site, callback) {
     LocalStorageManager.remove(site.getDomain(), callback);
   };

@@ -4,7 +4,7 @@ Example Local Storage  Object
   "currentPageDomain" : "facebook.com",
   "chromeHasFocus"    : false
   "facebook.com"      : {
-                          "lastNavigatedTime": 111,
+                           "lastNavigatedTime": 111,
                            "domain" : "facebook.com"
                            "datesTracked": {
                                             "5/20/2016": 11,
@@ -18,7 +18,7 @@ need an instance of LocalStorageManager, I just grouped together functions
 inside an object literal.
 */
 
-var TimeTrackerUpdated = {
+var TimeTracker = {
 
   getDomainFromHostName: function(hostName) {
     var splitHostName = hostName.split("www.")
@@ -34,7 +34,7 @@ var TimeTrackerUpdated = {
       if(tabs.length > 0) {
         var url = new URL(tabs[0].url);
         var hostName = url.hostname;
-        var domain = TimeTrackerUpdated.getDomainFromHostName(hostName);
+        var domain = TimeTracker.getDomainFromHostName(hostName);
         callback(domain);
       }
     });
@@ -42,32 +42,43 @@ var TimeTrackerUpdated = {
 
   handleActiveTab: function() {
     var queryInfo = {active: true, currentWindow: true};
-    TimeTrackerUpdated.getDomainOfActiveTab(queryInfo, function(activeTabDomain) {
-      TimeTrackerUpdated.getCurrentPageDomain(activeTabDomain);
+    TimeTracker.getDomainOfActiveTab(queryInfo, function(activeTabDomain) {
+      TimeTracker.getCurrentPageDomain(activeTabDomain);
     });
   },
 
   getCurrentPageDomain: function(activeTabDomain) {
     LocalStorageManager.getSingleKey("currentPageDomain", function(previousPageDomain) {
       if(previousPageDomain && (activeTabDomain != previousPageDomain)) {
-        TimeTrackerUpdated.checkActiveTabForTrackedSite(activeTabDomain, previousPageDomain);
+        TimeTracker.checkActiveTabForTrackedSite(activeTabDomain, previousPageDomain);
       }
       LocalStorageManager.save("currentPageDomain", activeTabDomain);
     });
   },
 
   checkActiveTabForTrackedSite: function(activeTabDomain, previousPageDomain) {
-    LocalStorageManager.getSingleKey(activeTabDomain, function(siteObj) {
+    LocalStorageManager.getMultipleKeys([activeTabDomain, previousPageDomain], function(items) {
       var now = new Date();
       var currentActiveTime = now.getTime();
-      if(siteObj != null) {
-        siteObj = new Site(activeTabDomain, siteObj["lastNavigatedTime"], siteObj["datesTracked"]);
-        // Current active tab is being tracked
-        siteObj.updateLastNavigatedTime(currentActiveTime);
-        siteObj.saveToLocalStorage();
+      // Does this fully work now?
+      if(items != null) {
+        siteObj = items[activeTabDomain];
+        prevSiteObj = items[previousPageDomain];
+        if(siteObj) {
+          siteObj = new Site(activeTabDomain, siteObj["lastNavigatedTime"], siteObj["datesTracked"]);
+          // Current active tab is being tracked
+          siteObj.updateLastNavigatedTime(currentActiveTime);
+          siteObj.saveToLocalStorage();
+        }
+        // If previous page also tracked, we need to update it
+        // Doesn't matter if this gets run before saveToLocalStorage finishes
+        // Since it is working on two different local storage options
+        if(prevSiteObj) {
+          TimeTracker.updatePreviousPageDomain(previousPageDomain, currentActiveTime);
+        }
       } else {
         // Current active tab not being tracked
-        TimeTrackerUpdated.updatePreviousPageDomain(previousPageDomain, currentActiveTime);
+        TimeTracker.updatePreviousPageDomain(previousPageDomain, currentActiveTime);
       }
     });
   },
@@ -97,74 +108,39 @@ var TimeTrackerUpdated = {
         }
       }
     });
+  },
+
+  handleInactivity : function(callback) {
+    LocalStorageManager.getSingleKey("currentPageDomain", function(previousPageDomain) {
+      if(previousPageDomain) {
+        var now = new Date();
+        var currentActiveTime = now.getTime();
+        TimeTracker.updatePreviousPageLastNavigatedTime(previousPageDomain, currentActiveTime, callback);
+      }
+    });
+  },
+
+  updatePreviousPageLastNavigatedTime: function(previousPageDomain, currentActiveTime, callback) {
+    LocalStorageManager.getSingleKey(previousPageDomain, function(prevTabSiteObj) {
+      if(prevTabSiteObj != null) {
+        prevTabSiteObj = new Site(previousPageDomain, prevTabSiteObj["lastNavigatedTime"], prevTabSiteObj["datesTracked"]);
+        prevTabSiteObj.updateLastNavigatedTime(currentActiveTime);
+        prevTabSiteObj.saveToLocalStorage(callback);
+      }
+    });
+  },
+
+  // Hack to get around chrome api bug where focus change does not fire
+  // again when chrome comes into focus from external window
+  checkForInactivity : function() {
+    LocalStorageManager.getSingleKey("chromeHasFocus", function(chromeHasFocus) {
+      if(chromeHasFocus) {
+        TimeTracker.handleActiveTab();
+      } else {
+        LocalStorageManager.save("chromeHasFocus", true);
+        TimeTracker.handleInactivity(TimeTracker.handleActiveTab);
+      }
+    });
   }
 
 }
-
-
-var TimeTracker = (function() {
-  var _instance = null;
-
-  function TimeTracker() {
-    this.addSite = function(newSiteDomain) {
-      var site = new Site(newSiteDomain, undefined, {});
-      site.saveToLocalStorage();
-    };
-    this.removeSite = function(siteToRemove) {
-      siteToRemove.removeFromLocalStorage();
-    };
-    this.getCurrentPageDomain = function(callback) {
-      this.getFromLocalStorage("currentPageDomain", function(domain) {
-        callback(domain);
-      });
-    };
-    this.getTrackedSite = function(siteDomain, callback) {
-      this.getFromLocalStorage(siteDomain, function(siteObj) {
-        if(siteObj == null) {
-          callback(null)
-        } else {
-          callback(new Site(siteDomain, siteObj["lastNavigatedTime"], siteObj["datesTracked"]));
-        }
-      });
-    };
-    this.setCurrentPageDomain = function(activeTabDomain) {
-      this.saveToLocalStorage("currentPageDomain", activeTabDomain);
-    };
-    this.getFromLocalStorage = function(key, callback) {
-      chrome.storage.sync.get(key, function(obj) {
-        if(objectEmpty(obj)) {
-          callback(null);
-        } else {
-          callback(obj[key]);
-        }
-      });
-    };
-    this.getAllFromLocalStorage = function(callback) {
-      chrome.storage.sync.get(null, function(obj) {
-        if(objectEmpty(obj)) {
-          callback(null);
-        } else {
-          callback(obj);
-        }
-      });
-    };
-    this.saveToLocalStorage = function(key, toSave, callback) {
-      var obj = {};
-      obj[key] = toSave;
-      chrome.storage.sync.set(obj, callback);
-    };
-    this.removeFromLocalStorage = function(domain, callback) {
-      chrome.storage.sync.remove(domain, callback);
-    };
-  }
-
-  return {
-    getInstance: function() {
-      if (!_instance) {
-        _instance = new TimeTracker();
-        _instance.__proto__.constructor = function(){}; // hide constructor
-      }
-      return _instance;
-    }
-  };
-})();

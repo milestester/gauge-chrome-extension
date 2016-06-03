@@ -18,9 +18,7 @@ Methods
   - handleInactivity(callback)
 
 Site.js
-  -
-  -
-  -
+  - Constructor function for a Site object
 
 
  ---------------------
