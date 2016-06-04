@@ -9,31 +9,28 @@
       font-family: 'Roboto', sans-serif;
     }
     .storedsite {
-      color: #fff;
       font-size: 15px;
       padding: 10px;
-      background-color: rgb(84,94,115);
+    }
+    .storedsite, #websiteInput {
       text-align: center;
+      color: #fff;
     }
-    #current-websites .storedsite:hover {
-      background-color: #e74c3c;
+    #current-websites .storedsite span:hover {
       cursor: pointer;
+      text-decoration: underline;
     }
-    #current-websites .storedsite:hover span:last-child{
+    #current-websites .storedsite:hover span{
       display: inline-block;
     }
     #current-websites .storedsite:hover span:first-child{
       display: none;
     }
-    span:last-child {
+    .options {
       display: none;
     }
-    input {
-      text-align: center;
-      background-color: rgb(84,94,115);
-    }
-    input:focus {
-      color: #fff;
+    span {
+      margin: 0 10px;
     }
   </style>
   <script src="LocalStorageManager.js"></script>

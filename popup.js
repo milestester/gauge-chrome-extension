@@ -2,7 +2,6 @@ document.addEventListener("DOMContentLoaded", function() {
   openOptionsPane();
   // Bug here when next day, and lastNavigatedTime is yesterday
   // When you click on popup, time set to large amount?
-  updateCurrentTabOnPopupClick();
   LocalStorageManager.getSingleKey("chromeHasFocus", function(chromeHasFocus) {
     if(chromeHasFocus) {
       updateCurrentTabOnPopupClick();
@@ -28,8 +27,9 @@ function updateCurrentTabOnPopupClick() {
   var queryInfo = {active: true, currentWindow: true};
   TimeTracker.getDomainOfActiveTab(queryInfo, function(activeTabDomain){
     LocalStorageManager.getSingleKey(activeTabDomain, function(siteObj) {
+      console.log(siteObj);
       if(siteObj != null) {
-        siteObj = new Site(activeTabDomain, siteObj["lastNavigatedTime"], siteObj["datesTracked"]);
+        siteObj = new Site(activeTabDomain, siteObj["lastNavigatedTime"], siteObj["datesTracked"], siteObj["colour"]);
         // Tab when extension button pressed is being tracked
         var now = new Date();
         var currentActiveTime = now.getTime();
@@ -59,7 +59,7 @@ function updatePopup() {
           dataArray.push(100);
         }
         labelArray.push(property);
-        dataColorArray.push(randomColor(0.7));
+        dataColorArray.push(currentSiteObj["colour"]);
       }
     }
     buildGraph(dataArray, labelArray, dataColorArray);
@@ -134,11 +134,3 @@ function msToTime(duration) {
     var hours = parseInt((duration/(1000*60*60))%24);
     return {hours: hours, minutes: minutes, seconds: seconds, milliseconds: milliseconds};
 }
-
-var randomColorFactor = function() {
-  return Math.round(Math.random() * 255);
-};
-
-var randomColor = function(opacity) {
-  return 'rgba(' + randomColorFactor() + ',' + randomColorFactor() + ',' + randomColorFactor() + ',' + (opacity || '.3') + ')';
-};
