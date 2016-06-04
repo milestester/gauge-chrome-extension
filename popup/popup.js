@@ -2,6 +2,9 @@ document.addEventListener("DOMContentLoaded", function() {
   openOptionsPane();
   // Bug here when next day, and lastNavigatedTime is yesterday
   // When you click on popup, time set to large amount?
+
+  // Bad fix for update popup not showing
+  var alreadyDone = false;
   LocalStorageManager.getSingleKey("chromeHasFocus", function(chromeHasFocus) {
     if(chromeHasFocus) {
       updateCurrentTabOnPopupClick();
@@ -9,8 +12,12 @@ document.addEventListener("DOMContentLoaded", function() {
       LocalStorageManager.save("chromeHasFocus", true);
       TimeTracker.handleInactivity(updateCurrentTabOnPopupClick);
     }
+    alreadyDone = true;
   });
 
+  if(!alreadyDone) {
+    updateCurrentTabOnPopupClick();
+  }
 });
 
 function openOptionsPane() {
@@ -18,7 +25,7 @@ function openOptionsPane() {
     if(chrome.runtime.openOptionsPage) {
       chrome.runtime.openOptionsPage();
     } else {
-      window.open(chrome.runtime.getURL('options.html'));
+      window.open(chrome.runtime.getURL('/options/options.html'));
     }
   });
 }
