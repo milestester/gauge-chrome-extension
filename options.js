@@ -8,17 +8,13 @@ function createNodeWithText(nodeType, text) {
 function buildOptionLabel(labelText, colour) {
   var node = document.createElement("p");
   node.className = "storedsite";
-  node.appendChild(createNodeWithText("span", labelText));
-
   node.style.backgroundColor = colour;
-
+  node.appendChild(createNodeWithText("span", labelText));
   var deleteSpan = createNodeWithText("span", "delete");
   var idleSpan = createNodeWithText("span", "idle");
   var changeColourSpan = createNodeWithText("span", "colour");
-
   var dividerSpan = createNodeWithText("span", "|");
   var dividerSpan2 = createNodeWithText("span", "|");
-
   deleteSpan.className = "options delete";
   idleSpan.className = "options";
   changeColourSpan.className = "options";
@@ -31,6 +27,13 @@ function buildOptionLabel(labelText, colour) {
   node.appendChild(dividerSpan2);
   node.appendChild(idleSpan);
 
+  document.getElementById("current-websites").appendChild(node);
+
+  setColourSpanEventListener(changeColourSpan, colour, labelText);
+  setDeleteSpanEventListener(deleteSpan, node, colour);
+}
+
+function setColourSpanEventListener(changeColourSpan) {
   changeColourSpan.onmousedown = function(e) {
     LocalStorageManager.getSingleKey(labelText, function(siteObj) {
       if(siteObj != null) {
@@ -41,15 +44,16 @@ function buildOptionLabel(labelText, colour) {
       }
     });
   };
+}
 
-  document.getElementById("current-websites").appendChild(node);
+function setDeleteSpanEventListener(deleteSpan, node, colour) {
   deleteSpan.onmousedown = deleteItem(node);
   deleteSpan.onmouseover = function(e) {
     node.style.backgroundColor = "#e74c3c";
   };
   deleteSpan.onmouseout = function(e) {
     node.style.backgroundColor = colour;
-  }
+  };
 }
 
 function loadCurrentWebsites() {
@@ -68,7 +72,6 @@ function loadCurrentWebsites() {
   });
 }
 
-// TODO: validate entered URL
 function setEventListeners() {
   document.getElementById("websiteInput").onkeypress = function(e){
     if (!e) e = window.event;
