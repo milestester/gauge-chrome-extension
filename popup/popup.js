@@ -2,22 +2,13 @@ document.addEventListener("DOMContentLoaded", function() {
   openOptionsPane();
   // Bug here when next day, and lastNavigatedTime is yesterday
   // When you click on popup, time set to large amount?
-
-  // Bad fix for update popup not showing
-  var alreadyDone = false;
   LocalStorageManager.getSingleKey("chromeHasFocus", function(chromeHasFocus) {
-    if(chromeHasFocus) {
-      updateCurrentTabOnPopupClick();
-    } else {
+    if(!chromeHasFocus) {
       LocalStorageManager.save("chromeHasFocus", true);
-      TimeTracker.handleInactivity(updateCurrentTabOnPopupClick);
+      TimeTracker.handleInactivity();
     }
-    alreadyDone = true;
-  });
-
-  if(!alreadyDone) {
     updateCurrentTabOnPopupClick();
-  }
+  });
 });
 
 function openOptionsPane() {
@@ -34,7 +25,6 @@ function updateCurrentTabOnPopupClick() {
   var queryInfo = {active: true, currentWindow: true};
   TimeTracker.getDomainOfActiveTab(queryInfo, function(activeTabDomain){
     LocalStorageManager.getSingleKey(activeTabDomain, function(siteObj) {
-      console.log(siteObj);
       if(siteObj != null) {
         siteObj = new Site(activeTabDomain, siteObj["lastNavigatedTime"], siteObj["datesTracked"], siteObj["colour"]);
         // Tab when extension button pressed is being tracked
