@@ -3,17 +3,27 @@ Example Site Object
 {
   "domain": "facebook.com",
   "lastNavigatedTime": 100,
-  "datesTracked": {"5/20/2016": 1234, "5/21/2016": 1234}
+  "datesTracked": {"5/20/2016": 1234, "5/21/2016": 1234},
+  "color": "#fff"
 }
 
 This class holds data relevant to time tracking for a given website
 
 */
 
-var Site = function(domain, lastNavigatedTime, datesTracked) {
+var Site = function(domain, lastNavigatedTime, datesTracked, chartColour) {
   this.domain = domain;
   this.lastNavigatedTime = lastNavigatedTime;
   this.datesTracked = datesTracked;
+  this.colour = chartColour;
+
+  this.setColour = function(newColour) {
+    this.colour = newColour;
+  };
+
+  this.getColour = function() {
+    return this.colour;
+  };
 
   this.addToday = function(todaysDate, timeToAdd) {
     if(!this.datesTracked.todaysDate) {
@@ -58,6 +68,7 @@ var Site = function(domain, lastNavigatedTime, datesTracked) {
     innerObj["domain"] = this.domain;
     innerObj["lastNavigatedTime"] = this.lastNavigatedTime;
     innerObj["datesTracked"] = this.datesTracked;
+    innerObj["colour"] = this.colour;
     outerObj[this.domain] = innerObj;
     LocalStorageManager.saveObj(outerObj, callback);
   };

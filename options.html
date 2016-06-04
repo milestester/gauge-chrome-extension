@@ -7,33 +7,35 @@
     body {
       padding: 10px;
       font-family: 'Roboto', sans-serif;
+      text-align: center;
     }
     .storedsite {
       color: #fff;
       font-size: 15px;
       padding: 10px;
       background-color: rgb(84,94,115);
-      text-align: center;
     }
-    #current-websites .storedsite:hover {
-      background-color: #e74c3c;
+    #current-websites .storedsite span:hover {
       cursor: pointer;
+      text-decoration: underline;
     }
-    #current-websites .storedsite:hover span:last-child{
+    #current-websites .storedsite:hover span{
       display: inline-block;
     }
     #current-websites .storedsite:hover span:first-child{
       display: none;
     }
-    span:last-child {
-      display: none;
-    }
     input {
       text-align: center;
-      background-color: rgb(84,94,115);
     }
     input:focus {
       color: #fff;
+    }
+    .options {
+      display: none;
+    }
+    span {
+      margin: 0 10px;
     }
   </style>
   <script src="LocalStorageManager.js"></script>

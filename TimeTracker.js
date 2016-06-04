@@ -65,7 +65,7 @@ var TimeTracker = {
         siteObj = items[activeTabDomain];
         prevSiteObj = items[previousPageDomain];
         if(siteObj) {
-          siteObj = new Site(activeTabDomain, siteObj["lastNavigatedTime"], siteObj["datesTracked"]);
+          siteObj = new Site(activeTabDomain, siteObj["lastNavigatedTime"], siteObj["datesTracked"], siteObj["colour"]);
           // Current active tab is being tracked
           siteObj.updateLastNavigatedTime(currentActiveTime);
           siteObj.saveToLocalStorage();
@@ -86,7 +86,7 @@ var TimeTracker = {
   updatePreviousPageDomain: function(previousPageDomain, currentActiveTime) {
     LocalStorageManager.getSingleKey(previousPageDomain, function(prevTabSiteObj) {
       if(prevTabSiteObj != null) {
-        prevTabSiteObj = new Site(previousPageDomain, prevTabSiteObj["lastNavigatedTime"], prevTabSiteObj["datesTracked"]);
+        prevTabSiteObj = new Site(previousPageDomain, prevTabSiteObj["lastNavigatedTime"], prevTabSiteObj["datesTracked"], prevTabSiteObj["colour"]);
         // Previous tab was being tracked, so update its active time for today
         prevTabSiteObj.updateActiveTimeToday(currentActiveTime);
         prevTabSiteObj.saveToLocalStorage();
@@ -99,8 +99,7 @@ var TimeTracker = {
       for(var property in allObj) {
         if(allObj.hasOwnProperty(property) && property != "currentPageDomain" && property != "chromeHasFocus") {
           var currentSite = allObj[property];
-          var s = new Site(property, currentSite["lastNavigatedTime"], currentSite["datesTracked"]);
-          var datesTracked = currentSite["datesTracked"];
+          var s = new Site(property, currentSite["lastNavigatedTime"], currentSite["datesTracked"], currentSite["colour"]);
           var now = new Date();
           now.setDate(now.getDate()-8);
           s.removeDay(now.toLocaleDateString());
@@ -123,7 +122,7 @@ var TimeTracker = {
   updatePreviousPageLastNavigatedTime: function(previousPageDomain, currentActiveTime, callback) {
     LocalStorageManager.getSingleKey(previousPageDomain, function(prevTabSiteObj) {
       if(prevTabSiteObj != null) {
-        prevTabSiteObj = new Site(previousPageDomain, prevTabSiteObj["lastNavigatedTime"], prevTabSiteObj["datesTracked"]);
+        prevTabSiteObj = new Site(previousPageDomain, prevTabSiteObj["lastNavigatedTime"], prevTabSiteObj["datesTracked"], prevTabSiteObj["colour"]);
         prevTabSiteObj.updateLastNavigatedTime(currentActiveTime);
         prevTabSiteObj.saveToLocalStorage(callback);
       }
