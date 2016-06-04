@@ -59,6 +59,10 @@ function updatePopup() {
         dataColorArray.push(currentSiteObj["colour"]);
       }
     }
+    if(dataArray.length == 0) {
+      dataArray.push(100);
+      labelArray.push("No Tracked Websites");
+    }
     buildGraph(dataArray, labelArray, dataColorArray);
   });
 }
