@@ -29,11 +29,11 @@ function buildOptionLabel(labelText, colour) {
 
   document.getElementById("current-websites").appendChild(node);
 
-  setColourSpanEventListener(changeColourSpan, colour, labelText);
+  setColourSpanEventListener(changeColourSpan, colour, labelText, node);
   setDeleteSpanEventListener(deleteSpan, node, colour);
 }
 
-function setColourSpanEventListener(changeColourSpan) {
+function setColourSpanEventListener(changeColourSpan, colour, labelText, node) {
   changeColourSpan.onmousedown = function(e) {
     LocalStorageManager.getSingleKey(labelText, function(siteObj) {
       if(siteObj != null) {

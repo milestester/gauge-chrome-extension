@@ -14,21 +14,21 @@
   ],
 
   "browser_action": {
-    "default_icon": "icon128.png",
-    "default_popup": "popup.html"
+    "default_icon": "/img/icon128.png",
+    "default_popup": "/popup/popup.html"
   },
 
   "background" : {
-    "scripts": ["LocalStorageManager.js", "TimeTracker.js", "Site.js", "eventPage.js"],
+    "scripts": ["/js/LocalStorageManager.js", "/js/TimeTracker.js", "/js/Site.js", "/background/eventPage.js"],
     "persistent": false
   },
 
  "options_ui": {
-  "page": "options.html",
+  "page": "/options/options.html",
   "chrome_style": true
   },
 
   "icons" : {
-    "128" :  "icon128.png"
+    "128" :  "/img/icon128.png"
   }
 }
