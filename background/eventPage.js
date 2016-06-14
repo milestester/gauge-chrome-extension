@@ -25,9 +25,11 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
   }
 });
 
-// chrome.idle.setDetectionInterval(15);
-// chrome.idle.onStateChanged.addListener(function(state) {
-//   if(state == "active") {
-//     handleInactivity();
-//   }
-// });
+chrome.idle.setDetectionInterval(30);
+chrome.idle.onStateChanged.addListener(function(state) {
+  LocalStorageManager.getSingleKey("idle", function(idleBoolean) {
+    if(idleBoolean === true && state == "active") {
+      TimeTracker.handleInactivity();
+    }
+  });
+});

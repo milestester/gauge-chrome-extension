@@ -47,7 +47,7 @@ function updatePopup() {
     var dataColorArray = [];
     var now = new Date();
     for(var property in all) {
-      if(all.hasOwnProperty(property) && property != "currentPageDomain" && property != "chromeHasFocus") {
+      if(all.hasOwnProperty(property) && property != "currentPageDomain" && property != "chromeHasFocus" && property != "idle") {
         var currentSiteObj = all[property];
         var datesTracked = currentSiteObj["datesTracked"];
         if(datesTracked[now.toLocaleDateString()]) {
@@ -105,19 +105,19 @@ function buildGraph(dataArray, labelArray, dataColorArray) {
       mode: "single",
       callbacks: {
         label: function(tooltipItems, data) {
-            var fullTime = msToTime(data.datasets[0].data[tooltipItems.index]);
-            var output = "";
-            if(fullTime["hours"] > 0) {
-              output += fullTime["hours"] + " hours, ";
-            }
-            if(fullTime["minutes"] >= 0) {
-              output += fullTime["minutes"] + " minutes, "
-            }
-            if(fullTime["seconds"] >= 0) {
-              output += fullTime["seconds"] + " seconds"
-            }
-            return output;
+          var fullTime = msToTime(data.datasets[0].data[tooltipItems.index]);
+          var output = "";
+          if(fullTime["hours"] > 0) {
+            output += fullTime["hours"] + " hours, ";
           }
+          if(fullTime["minutes"] >= 0) {
+            output += fullTime["minutes"] + " minutes, "
+          }
+          if(fullTime["seconds"] >= 0) {
+            output += fullTime["seconds"] + " seconds"
+          }
+          return output;
+        }
       }
     }
   };
@@ -129,9 +129,9 @@ function buildGraph(dataArray, labelArray, dataColorArray) {
 }
 
 function msToTime(duration) {
-    var milliseconds = parseInt((duration%1000)/100);
-    var seconds = parseInt((duration/1000)%60);
-    var minutes = parseInt((duration/(1000*60))%60);
-    var hours = parseInt((duration/(1000*60*60))%24);
-    return {hours: hours, minutes: minutes, seconds: seconds, milliseconds: milliseconds};
+  var milliseconds = parseInt((duration%1000)/100);
+  var seconds = parseInt((duration/1000)%60);
+  var minutes = parseInt((duration/(1000*60))%60);
+  var hours = parseInt((duration/(1000*60*60))%24);
+  return {hours: hours, minutes: minutes, seconds: seconds, milliseconds: milliseconds};
 }

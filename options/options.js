@@ -11,21 +11,15 @@ function buildOptionLabel(labelText, colour) {
   node.style.backgroundColor = colour;
   node.appendChild(createNodeWithText("span", labelText));
   var deleteSpan = createNodeWithText("span", "delete");
-  var idleSpan = createNodeWithText("span", "idle");
   var changeColourSpan = createNodeWithText("span", "colour");
   var dividerSpan = createNodeWithText("span", "|");
-  var dividerSpan2 = createNodeWithText("span", "|");
   deleteSpan.className = "options delete";
-  idleSpan.className = "options";
   changeColourSpan.className = "options";
   dividerSpan.className = "options";
-  dividerSpan2.className = "options";
 
   node.appendChild(deleteSpan);
   node.appendChild(dividerSpan);
   node.appendChild(changeColourSpan);
-  node.appendChild(dividerSpan2);
-  node.appendChild(idleSpan);
 
   document.getElementById("current-websites").appendChild(node);
 
@@ -57,11 +51,16 @@ function setDeleteSpanEventListener(deleteSpan, node, colour) {
 }
 
 function loadCurrentWebsites() {
+  document.getElementById('idle').addEventListener('click', saveIdleOption);
   document.getElementById("websiteInput").focus();
   LocalStorageManager.getMultipleKeys(null, function(all) {
     for(var property in all) {
       if(all.hasOwnProperty(property) && property != "currentPageDomain" && property != "chromeHasFocus") {
-        buildOptionLabel(property, all[property]["colour"]);
+        if(property == "idle") {
+          document.getElementById('idle').checked = all[property];
+        } else {
+          buildOptionLabel(property, all[property]["colour"]);
+        }
       }
     }
     var colour = randomColour(0.7);
@@ -113,6 +112,11 @@ function deleteItem(node) {
       document.getElementById("current-websites").removeChild(node);
     });
   };
+}
+
+function saveIdleOption() {
+  var checked = this.checked;
+  LocalStorageManager.save("idle", checked);
 }
 
 document.addEventListener('DOMContentLoaded', loadCurrentWebsites);
