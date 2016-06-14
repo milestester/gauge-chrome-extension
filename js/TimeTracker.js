@@ -97,7 +97,7 @@ var TimeTracker = {
   sanitizeWeeklyData: function() {
     LocalStorageManager.getMultipleKeys(null, function(allObj) {
       for(var property in allObj) {
-        if(allObj.hasOwnProperty(property) && property != "currentPageDomain" && property != "chromeHasFocus") {
+        if(allObj.hasOwnProperty(property) && property != "currentPageDomain" && property != "chromeHasFocus" && property != "idle") {
           var currentSite = allObj[property];
           var s = new Site(property, currentSite["lastNavigatedTime"], currentSite["datesTracked"], currentSite["colour"]);
           var now = new Date();
