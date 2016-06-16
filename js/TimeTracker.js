@@ -101,8 +101,13 @@ var TimeTracker = {
           var currentSite = allObj[property];
           var s = new Site(property, currentSite["lastNavigatedTime"], currentSite["datesTracked"], currentSite["colour"]);
           var now = new Date();
-          now.setDate(now.getDate()-8);
-          s.removeDay(now.toLocaleDateString());
+          now.setDate(now.getDate()-7);
+          for(date in currentSite["datesTracked"]) {
+            var d = new Date(date);
+            if(d.getTime() <= now.getTime()) {
+              s.removeDay(date);
+            }
+          }
           s.saveToLocalStorage();
         }
       }

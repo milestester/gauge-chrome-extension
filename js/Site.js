@@ -16,64 +16,64 @@ var Site = function(domain, lastNavigatedTime, datesTracked, chartColour) {
   this.lastNavigatedTime = lastNavigatedTime;
   this.datesTracked = datesTracked;
   this.colour = chartColour;
-
-  this.setColour = function(newColour) {
-    this.colour = newColour;
-  };
-
-  this.getColour = function() {
-    return this.colour;
-  };
-
-  this.addToday = function(todaysDate, timeToAdd) {
-    if(!this.datesTracked.todaysDate) {
-      this.datesTracked.todaysDate = 0;
-    }
-    this.datesTracked.todaysDate += timeToAdd;
-  };
-
-  this.removeDay = function(dateToRemove) {
-    if(this.datesTracked[dateToRemove]) {
-      delete this.datesTracked[dateToRemove];
-    }
-  };
-
-  this.getDateData = function(date) {
-    return this.datesTracked.date;
-  };
-
-  this.getDomain = function() {
-    return this.domain;
-  };
-
-  this.getLastNavigatedTime = function() {
-    return this.lastNavigatedTime;
-  };
-
-  this.updateLastNavigatedTime = function(newTime) {
-    this.lastNavigatedTime = newTime;
-  };
-
-  this.updateActiveTimeToday = function(currentActiveTime) {
-    var now = new Date();
-    if(!this.datesTracked[now.toLocaleDateString()]) {
-      this.datesTracked[now.toLocaleDateString()] = 0;
-    }
-    this.datesTracked[now.toLocaleDateString()] += (currentActiveTime - this.lastNavigatedTime);
-  };
-
-  this.saveToLocalStorage = function(callback) {
-    var outerObj = {};
-    var innerObj = {};
-    innerObj["domain"] = this.domain;
-    innerObj["lastNavigatedTime"] = this.lastNavigatedTime;
-    innerObj["datesTracked"] = this.datesTracked;
-    innerObj["colour"] = this.colour;
-    outerObj[this.domain] = innerObj;
-    LocalStorageManager.saveObj(outerObj, callback);
-  };
-
-  this.removeFromLocalStorage = function(site, callback) {
-    LocalStorageManager.remove(site.getDomain(), callback);
-  };
 }
+
+Site.prototype.setColour = function(newColour) {
+  this.colour = newColour;
+};
+
+Site.prototype.getColour = function() {
+  return this.colour;
+};
+
+Site.prototype.addToday = function(todaysDate, timeToAdd) {
+  if(!this.datesTracked.todaysDate) {
+    this.datesTracked.todaysDate = 0;
+  }
+  this.datesTracked.todaysDate += timeToAdd;
+};
+
+Site.prototype.removeDay = function(dateToRemove) {
+  if(this.datesTracked[dateToRemove]) {
+    delete this.datesTracked[dateToRemove];
+  }
+};
+
+Site.prototype.getDateData = function(date) {
+  return this.datesTracked.date;
+};
+
+Site.prototype.getDomain = function() {
+  return this.domain;
+};
+
+Site.prototype.getLastNavigatedTime = function() {
+  return this.lastNavigatedTime;
+};
+
+Site.prototype.updateLastNavigatedTime = function(newTime) {
+  this.lastNavigatedTime = newTime;
+};
+
+Site.prototype.updateActiveTimeToday = function(currentActiveTime) {
+  var now = new Date();
+  if(!this.datesTracked[now.toLocaleDateString()]) {
+    this.datesTracked[now.toLocaleDateString()] = 0;
+  }
+  this.datesTracked[now.toLocaleDateString()] += (currentActiveTime - this.lastNavigatedTime);
+};
+
+Site.prototype.saveToLocalStorage = function(callback) {
+  var outerObj = {};
+  var innerObj = {};
+  innerObj["domain"] = this.domain;
+  innerObj["lastNavigatedTime"] = this.lastNavigatedTime;
+  innerObj["datesTracked"] = this.datesTracked;
+  innerObj["colour"] = this.colour;
+  outerObj[this.domain] = innerObj;
+  LocalStorageManager.saveObj(outerObj, callback);
+};
+
+Site.prototype.removeFromLocalStorage = function(site, callback) {
+  LocalStorageManager.remove(site.getDomain(), callback);
+};
