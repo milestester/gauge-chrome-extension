@@ -87,17 +87,24 @@ function updatePopup(graphType) {
         obj["label"] = labelArray[i];
         obj["backgroundColor"] = dataColorArray[i];
         var sortable = [];
+        var now = new Date();
+        now.setDate(now.getDate()-6);
+        for(var k = 1; k <= 7; k++) {
+          sortable.push([now.toLocaleDateString(), 0]);
+          now.setDate(now.getDate()+1);
+        }
         for(var date in weeklyData[i]) {
-          sortable.push([date, weeklyData[i][date]]);
+          for(var n = 0; n < 7; n++) {
+            if(sortable[n][0] == date) {
+              sortable[n][1] = weeklyData[i][date];
+            }
+          }
         }
         sortable.sort(function(a, b) {return new Date(a[0]).getTime() - new Date(b[0]).getTime()});
         for(var j = 0; j < sortable.length; j++) {
           var current = sortable[j];
           if(weeklyLabels.length < 7) weeklyLabels.push(current[0]);
           weekTempData.push(current[1]);
-        }
-        while(weekTempData.length < 7) {
-          weekTempData.unshift(0);
         }
         obj["data"] = weekTempData;
         weekTempData = [];
