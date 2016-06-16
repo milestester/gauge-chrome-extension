@@ -1,6 +1,7 @@
 chrome.tabs.onActivated.addListener(TimeTracker.checkForInactivity);
 chrome.tabs.onUpdated.addListener(TimeTracker.checkForInactivity);
 chrome.runtime.onStartup.addListener(TimeTracker.sanitizeWeeklyData);
+chrome.runtime.onInstalled.addListener(TimeTracker.sanitizeWeeklyData);
 chrome.windows.onFocusChanged.addListener(function(windowId){
   if(windowId == chrome.windows.WINDOW_ID_NONE) {
     LocalStorageManager.save("chromeHasFocus", false);
