@@ -96,6 +96,9 @@ function updatePopup(graphType) {
           if(weeklyLabels.length < 7) weeklyLabels.push(current[0]);
           weekTempData.push(current[1]);
         }
+        while(weekTempData.length < 7) {
+          weekTempData.unshift(0);
+        }
         obj["data"] = weekTempData;
         weekTempData = [];
         dataSets.push(obj);
