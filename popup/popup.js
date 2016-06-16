@@ -1,5 +1,6 @@
 var myChart;
 var chartBoolean = false;
+var options;
 
 document.addEventListener("DOMContentLoaded", function() {
   openOptions();
@@ -78,43 +79,47 @@ function updatePopup(graphType) {
       labelArray.push("No Tracked Websites");
     }
     if(graphType == "weekly") {
-      var dataSets = [];
-      var weeklyLabels = [];
-      var weekTempData = [];
-      for(var i = 0; i < weeklyData.length; i++) {
-        var obj = {};
-        var dataTemp = [];
-        obj["label"] = labelArray[i];
-        obj["backgroundColor"] = dataColorArray[i];
-        var sortable = [];
-        var now = new Date();
-        now.setDate(now.getDate()-6);
-        for(var k = 1; k <= 7; k++) {
-          sortable.push([now.toLocaleDateString(), 0]);
-          now.setDate(now.getDate()+1);
-        }
-        for(var date in weeklyData[i]) {
-          for(var n = 0; n < 7; n++) {
-            if(sortable[n][0] == date) {
-              sortable[n][1] = weeklyData[i][date];
-            }
-          }
-        }
-        sortable.sort(function(a, b) {return new Date(a[0]).getTime() - new Date(b[0]).getTime()});
-        for(var j = 0; j < sortable.length; j++) {
-          var current = sortable[j];
-          if(weeklyLabels.length < 7) weeklyLabels.push(current[0]);
-          weekTempData.push(current[1]);
-        }
-        obj["data"] = weekTempData;
-        weekTempData = [];
-        dataSets.push(obj);
-      }
-      buildWeeklyGraph(dataSets, weeklyLabels);
+      setUpWeeklyData(weeklyData, dataColorArray, labelArray);
     } else {
       buildGraph(dataArray, labelArray, dataColorArray);
     }
   });
+}
+
+function setUpWeeklyData(weeklyData, dataColorArray, labelArray) {
+  var dataSets = [];
+  var weeklyLabels = [];
+  var weekTempData = [];
+  for(var i = 0; i < weeklyData.length; i++) {
+    var obj = {};
+    var dataTemp = [];
+    obj["label"] = labelArray[i];
+    obj["backgroundColor"] = dataColorArray[i];
+    var sortable = [];
+    var now = new Date();
+    now.setDate(now.getDate()-6);
+    for(var k = 1; k <= 7; k++) {
+      sortable.push([now.toLocaleDateString(), 0]);
+      now.setDate(now.getDate()+1);
+    }
+    for(var date in weeklyData[i]) {
+      for(var n = 0; n < 7; n++) {
+        if(sortable[n][0] == date) {
+          sortable[n][1] = weeklyData[i][date];
+        }
+      }
+    }
+    sortable.sort(function(a, b) {return new Date(a[0]).getTime() - new Date(b[0]).getTime()});
+    for(var j = 0; j < sortable.length; j++) {
+      var current = sortable[j];
+      if(weeklyLabels.length < 7) weeklyLabels.push(current[0]);
+      weekTempData.push(current[1]);
+    }
+    obj["data"] = weekTempData;
+    weekTempData = [];
+    dataSets.push(obj);
+  }
+  buildWeeklyGraph(dataSets, weeklyLabels);
 }
 
 function buildGraph(dataArray, labelArray, dataColorArray) {
@@ -129,7 +134,7 @@ function buildGraph(dataArray, labelArray, dataColorArray) {
         hoverBackgroundColor: dataColorArray
       }]
   };
-  var options = {
+  options = {
     responsive: true,
     defaultFontFamily: "Roboto",
     title: {
@@ -156,7 +161,7 @@ function buildGraph(dataArray, labelArray, dataColorArray) {
       mode: "single",
       callbacks: {
         label: function(tooltipItems, data) {
-          var fullTime = msToTime(data.datasets[0].data[tooltipItems.index]);
+          var fullTime = msToTime(data.datasets[tooltipItems.datasetIndex].data[tooltipItems.index]);
           var output = "";
           if(fullTime["hours"] > 0) {
             output += fullTime["hours"] + " hours, ";
@@ -188,59 +193,16 @@ function buildWeeklyGraph(dataSets, labelArray) {
     labels: labelArray,
     datasets: dataSets
   };
-  var options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    defaultFontFamily: "Roboto",
-    title: {
-      display: true,
-      text: "Time Spent This Week",
-      fontSize: 18,
-      fontFamily: "Roboto",
-      fontStyle: "normal",
-      fontColor: "rgb(117,117,117)",
-      padding: 15
-    },
-    legend: {
-      position: "bottom",
-      fullWidth: true,
-      labels: {
-        fontSize: 14,
-        fontFamily: "Roboto",
-        fontStyle: "normal",
-        fontColor: "rgb(117,117,117)"
-      }
-    },
-    scales: {
-        xAxes: [{
-            stacked: true
-        }],
-        yAxes: [{
-            stacked: true,
-            display: false,
-        }]
-    },
-    tooltips: {
-    enabled: true,
-    mode: "single",
-    callbacks: {
-      label: function(tooltipItems, data) {
-        var fullTime = msToTime(data.datasets[tooltipItems.datasetIndex].data[tooltipItems.index]);
-        var output = "";
-        if(fullTime["hours"] > 0) {
-          output += fullTime["hours"] + " hours, ";
-        }
-        if(fullTime["minutes"] >= 0) {
-          output += fullTime["minutes"] + " minutes, "
-        }
-        if(fullTime["seconds"] >= 0) {
-          output += fullTime["seconds"] + " seconds"
-        }
-        return output;
-      }
-    }
-    }
+  options.scales = {
+    xAxes: [{
+        stacked: true
+    }],
+    yAxes: [{
+        stacked: true,
+        display: false,
+    }]
   };
+  options.title.text = "Time Spent This Week";
   myChart.destroy();
   myChart = new Chart(ctx, {
     type: "bar",
