@@ -16,8 +16,13 @@
       text-align: center;
       color: #fff;
     }
+    #current-websites .storedsite span.delete {
+      cursor: url("../img/delete_cursor.png") 8 5, auto;
+    }
+    #current-websites .storedsite span.colour {
+      cursor: url("../img/color_cursor.png") 0 20, auto;
+    }
     #current-websites .storedsite span:hover {
-      cursor: pointer;
       text-decoration: underline;
     }
     #current-websites .storedsite:hover span{
@@ -47,7 +52,7 @@
     </label>
     <div id="current-websites"></div>
     <div class="storedsite">
-      <input id="websiteInput" type="text">
+      <input id="websiteInput" type="text" placeholder="example.com">
     </div>
   </div>
 </body>
