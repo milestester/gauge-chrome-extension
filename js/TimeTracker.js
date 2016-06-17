@@ -1,21 +1,10 @@
 /*
-Example Local Storage  Object
-{
-  "currentPageDomain" : "facebook.com",
-  "chromeHasFocus"    : false
-  "facebook.com"      : {
-                           "lastNavigatedTime": 111,
-                           "domain" : "facebook.com"
-                           "datesTracked": {
-                                            "5/20/2016": 11,
-                                            "5/22/2016": 13
-                                            }
-                        }
-}
+
 This class links to local storage which holds data about current websites being tracked.
 Instead of creating an object(class) to be instantiated, since we will never
 need an instance of LocalStorageManager, I just grouped together functions
 inside an object literal.
+
 */
 
 var TimeTracker = {
