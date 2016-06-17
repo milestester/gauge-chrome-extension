@@ -1,5 +1,23 @@
 /*
+
   Interface between the extension and chrome sync local storage
+
+  Example Local Storage  Object
+  {
+    "currentPageDomain" : "facebook.com",
+    "chromeHasFocus"    : false,
+    "idle"              : true
+    "facebook.com"      : {
+                             "colour" : rgb(128,128,128),
+                             "lastNavigatedTime": 111,
+                             "domain" : "facebook.com"
+                             "datesTracked": {
+                                              "5/20/2016": 11,
+                                              "5/22/2016": 13
+                                              }
+                          }
+  }
+
 */
 
 var LocalStorageManager = {
