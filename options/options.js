@@ -91,7 +91,6 @@ function setEventListeners() {
   }
 }
 
-// single letter URL
 function validURL(newURL) {
   var result = /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$/.test(newURL);
   return result;
