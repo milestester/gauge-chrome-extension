@@ -85,14 +85,15 @@ function setEventListeners() {
           that.style.backgroundColor = colour;
         });
       } else {
-        this.style.borderColor = "red";
+        this.style.borderColor = "#ED7568";
       }
     }
   }
 }
 
+// single letter URL
 function validURL(newURL) {
-  var result = /^[^www\.](.)+(\.(.)+)+/.test(newURL);
+  var result = /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$/.test(newURL);
   return result;
 }
 
