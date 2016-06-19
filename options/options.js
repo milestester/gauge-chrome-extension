@@ -56,38 +56,40 @@ function loadCurrentWebsites() {
     var colour = randomColour(0.7);
     document.getElementById("websiteInput").parentNode.style.backgroundColor = colour;
     document.getElementById("websiteInput").style.backgroundColor = colour;
-    document.getElementById("websiteInput").style.borderColor = "#fff";
+    document.getElementById("websiteInput").style.borderColor = "#F22613";
     setEventListeners();
   });
 }
 
 function setEventListeners() {
-  document.getElementById("websiteInput").onkeypress = function(e){
+  document.getElementById("websiteInput").onkeyup = function(e){
     if (!e) e = window.event;
     var keyCode = e.keyCode || e.which;
-    if (keyCode == '13'){
-      var newURL = this.value;
-      if(validURL(newURL)) {
-        var domain = TimeTracker.getDomainFromHostName(newURL);
-        var that = this;
-        LocalStorageManager.getSingleKey(domain, function(siteObj) {
-          if(siteObj == null) {
-            // Site not currently being tracked
-            var colour = document.getElementById("websiteInput").parentNode.style.backgroundColor;
-            var site = new Site(domain, undefined, {}, colour);
-            site.saveToLocalStorage();
-            buildOptionLabel(domain, colour);
-          }
-          that.value = "";
-          var colour = randomColour(0.7);
-          that.style.borderColor = "#fff";
-          that.parentNode.style.backgroundColor = colour;
-          that.style.backgroundColor = colour;
-        });
-      } else {
-        this.style.borderColor = "#ED7568";
+    var newURL = this.value;
+    if(validURL(newURL)) {
+      this.style.borderColor = "#87D37C";
+      if (keyCode == '13'){
+          var domain = TimeTracker.getDomainFromHostName(newURL);
+          var that = this;
+          LocalStorageManager.getSingleKey(domain, function(siteObj) {
+            if(siteObj == null) {
+              // Site not currently being tracked
+              var colour = document.getElementById("websiteInput").parentNode.style.backgroundColor;
+              var site = new Site(domain, undefined, {}, colour);
+              site.saveToLocalStorage();
+              buildOptionLabel(domain, colour);
+            }
+            that.value = "";
+            var colour = randomColour(0.7);
+            that.style.borderColor = "#F22613";
+            that.parentNode.style.backgroundColor = colour;
+            that.style.backgroundColor = colour;
+          });
       }
+    } else {
+      this.style.borderColor = "#F22613";
     }
+
   }
 }
 
